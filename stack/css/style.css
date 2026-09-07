@@ -36,7 +36,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  touch-action: none;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
@@ -138,6 +137,7 @@ body {
   overflow: hidden;
   background: linear-gradient(180deg, var(--ink-800), var(--ink-900));
   border: 1px solid var(--line);
+  touch-action: none;
   box-shadow: 0 20px 50px -25px rgba(0, 0, 0, 0.75);
 }
 

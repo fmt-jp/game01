@@ -49,7 +49,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  touch-action: none;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
@@ -165,6 +164,7 @@ body {
   border-radius: 14px;
   padding: 10px;
   box-shadow: 0 20px 50px -25px rgba(0, 0, 0, 0.7);
+  touch-action: none;
 }
 
 .grid-bg {
