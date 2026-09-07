@@ -3,68 +3,205 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>2048</title>
+<title>ポケットアーケード</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
-<link rel="stylesheet" href="css/style.css">
+<style>
+  :root {
+    --ink-900: #101319;
+    --ink-800: #191d26;
+    --panel: #1c212b;
+    --paper: #f1efe9;
+    --muted: #949ba8;
+    --line: rgba(241, 239, 233, 0.09);
+
+    --ember: #ff7a45;
+    --gold: #ffcf6b;
+    --teal: #35e0c4;
+
+    --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+    --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; }
+
+  body {
+    background: var(--ink-900);
+    background-image:
+      radial-gradient(ellipse 620px 420px at 12% -8%, rgba(255, 122, 69, 0.12), transparent 60%),
+      radial-gradient(ellipse 560px 420px at 100% 10%, rgba(53, 224, 196, 0.12), transparent 58%);
+    color: var(--paper);
+    font-family: var(--font-body);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  .page {
+    width: 100%;
+    max-width: 460px;
+    padding: 32px 18px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .masthead h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 2rem;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    color: var(--paper);
+    text-wrap: balance;
+  }
+
+  .masthead p {
+    margin: 8px 0 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+    max-width: 32ch;
+  }
+
+  .games {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .game-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .game-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+    pointer-events: none;
+  }
+  .game-card.ember::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--ember), transparent 70%); }
+  .game-card.teal::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--teal), transparent 70%); }
+
+  .preview {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    display: grid;
+    overflow: hidden;
+  }
+
+  .preview.grid-2048 {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 4px;
+    background: var(--ink-800);
+    padding: 4px;
+  }
+  .preview.grid-2048 span:nth-child(1) { background: #f7ab4e; }
+  .preview.grid-2048 span:nth-child(2) { background: #ef8a3d; }
+  .preview.grid-2048 span:nth-child(3) { background: #ffe07a; }
+  .preview.grid-2048 span:nth-child(4) { background: #3a3050; }
+  .preview.grid-2048 span { border-radius: 4px; }
+
+  .preview.stack-blocks {
+    background: var(--ink-800);
+    align-items: center;
+    justify-items: center;
+    gap: 4px;
+    padding: 8px 6px;
+  }
+  .preview.stack-blocks span {
+    display: block;
+    height: 8px;
+    border-radius: 3px;
+  }
+  .preview.stack-blocks span:nth-child(1) { width: 70%; background: #35e0c4; }
+  .preview.stack-blocks span:nth-child(2) { width: 88%; background: #4de8cd; }
+  .preview.stack-blocks span:nth-child(3) { width: 56%; background: #6fefd6; }
+
+  .game-info { flex: 1; min-width: 0; }
+
+  .game-info h2 {
+    margin: 0 0 3px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--paper);
+  }
+
+  .game-info p {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+
+  .play-arrow {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    background: rgba(241, 239, 233, 0.08);
+    color: var(--paper);
+  }
+  .game-card.ember .play-arrow { color: var(--ember); }
+  .game-card.teal .play-arrow { color: var(--teal); }
+
+  footer {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--muted);
+    opacity: 0.7;
+  }
+</style>
 </head>
 <body>
   <div class="page">
     <header class="masthead">
-      <div>
-        <h1>2048</h1>
-        <p class="tagline">同じ数字を重ねて、ひと目盛りずつ大きな数へ。</p>
-      </div>
-      <div class="scores">
-        <div class="score-box">
-          <span class="score-label">SCORE</span>
-          <span class="score-value" id="score">0</span>
-        </div>
-        <div class="score-box">
-          <span class="score-label">BEST</span>
-          <span class="score-value" id="best">0</span>
-        </div>
-      </div>
+      <h1>ポケットアーケード</h1>
+      <p>スマホでサクッと遊べるミニゲーム集。好きな一本をタップしてスタート。</p>
     </header>
 
-    <div class="howto">
-      <div class="howto-glyphs">
-        <span>▲</span><span>◀</span><span>▼</span><span>▶</span>
-      </div>
-      <p><strong>スワイプでタイルを移動。</strong>同じ数字同士がぶつかると合体して2倍になります。矢印キーでも操作できます。</p>
-    </div>
-
-    <div class="board-wrap">
-      <div class="board" id="board">
-        <div class="grid-bg" id="grid-bg"></div>
-        <div class="tiles" id="tiles"></div>
-        <div class="overlay" id="overlay" hidden>
-          <div class="overlay-message" id="overlay-message"></div>
-          <button class="btn" id="overlay-btn">もう一度</button>
+    <div class="games">
+      <a class="game-card ember" href="2048/index.html">
+        <div class="preview grid-2048"><span></span><span></span><span></span><span></span></div>
+        <div class="game-info">
+          <h2>2048</h2>
+          <p>同じ数字を合わせて2048を目指す、スワイプ操作のナンバーパズル。</p>
         </div>
-      </div>
+        <div class="play-arrow">▶</div>
+      </a>
+
+      <a class="game-card teal" href="stack/index.html">
+        <div class="preview stack-blocks"><span></span><span></span><span></span></div>
+        <div class="game-info">
+          <h2>つみあげ</h2>
+          <p>ゆれるブロックをタップで積み上げる、片手プレイの一発勝負パズル。</p>
+        </div>
+        <div class="play-arrow">▶</div>
+      </a>
     </div>
 
-    <div class="toolbar">
-      <button class="btn" id="new-game-btn">新しいゲーム</button>
-    </div>
-
-    <section class="about">
-      <h2>遊び方</h2>
-      <dl>
-        <dt>操作</dt>
-        <dd>盤面を上下左右にスワイプすると、すべてのタイルがその方向へ一斉にスライドします。</dd>
-        <dt>合体</dt>
-        <dd>同じ数字のタイル同士がぶつかると合体し、2倍の数字になります（2+2→4、4+4→8…）。</dd>
-        <dt>目標</dt>
-        <dd>「2048」のタイルを作れば達成。盤面が埋まってどこにも動かせなくなるとゲームオーバーです。</dd>
-        <dt>スコア</dt>
-        <dd>合体でできた数字がそのままスコアに加算されます。ベストスコアは端末に自動保存されます。</dd>
-      </dl>
-    </section>
-
-    <footer>達成後もそのまま遊び続けて、さらに高いスコアを狙えます。</footer>
+    <footer>今後もミニゲームを追加予定。</footer>
   </div>
-
-  <script src="js/game.js"></script>
 </body>
 </html>
