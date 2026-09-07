@@ -3,13 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>2048 パズル</title>
+<title>2048</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="app">
-    <header class="header">
-      <h1 class="title">2048</h1>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>2048</h1>
+        <p class="tagline">同じ数字を重ねて、ひと目盛りずつ大きな数へ。</p>
+      </div>
       <div class="scores">
         <div class="score-box">
           <span class="score-label">SCORE</span>
@@ -22,22 +26,43 @@
       </div>
     </header>
 
-    <div class="toolbar">
-      <p class="hint">スワイプでタイルを動かして、2048を目指そう！</p>
-      <button class="btn" id="new-game-btn">新しいゲーム</button>
+    <div class="howto">
+      <div class="howto-glyphs">
+        <span>▲</span><span>◀</span><span>▼</span><span>▶</span>
+      </div>
+      <p><strong>スワイプでタイルを移動。</strong>同じ数字同士がぶつかると合体して2倍になります。矢印キーでも操作できます。</p>
     </div>
 
     <div class="board-wrap">
       <div class="board" id="board">
         <div class="grid-bg" id="grid-bg"></div>
         <div class="tiles" id="tiles"></div>
-      </div>
-
-      <div class="overlay" id="overlay" hidden>
-        <div class="overlay-message" id="overlay-message"></div>
-        <button class="btn" id="overlay-btn">もう一度</button>
+        <div class="overlay" id="overlay" hidden>
+          <div class="overlay-message" id="overlay-message"></div>
+          <button class="btn" id="overlay-btn">もう一度</button>
+        </div>
       </div>
     </div>
+
+    <div class="toolbar">
+      <button class="btn" id="new-game-btn">新しいゲーム</button>
+    </div>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>操作</dt>
+        <dd>盤面を上下左右にスワイプすると、すべてのタイルがその方向へ一斉にスライドします。</dd>
+        <dt>合体</dt>
+        <dd>同じ数字のタイル同士がぶつかると合体し、2倍の数字になります（2+2→4、4+4→8…）。</dd>
+        <dt>目標</dt>
+        <dd>「2048」のタイルを作れば達成。盤面が埋まってどこにも動かせなくなるとゲームオーバーです。</dd>
+        <dt>スコア</dt>
+        <dd>合体でできた数字がそのままスコアに加算されます。ベストスコアは端末に自動保存されます。</dd>
+      </dl>
+    </section>
+
+    <footer>達成後もそのまま遊び続けて、さらに高いスコアを狙えます。</footer>
   </div>
 
   <script src="js/game.js"></script>
