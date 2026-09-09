@@ -1,6 +1,10 @@
 (() => {
   const STORAGE_PROGRESS = "sokoban-cleared-levels";
 
+  const PLAYER_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7.5" r="4"/><path d="M4 21v-1c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5v1H4z"/></svg>`;
+
+  const CONTAINER_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2.2" y="6" width="19.6" height="12.5" rx="1.4"/><line x1="6.2" y1="6" x2="6.2" y2="18.5"/><line x1="10.1" y1="6" x2="10.1" y2="18.5"/><line x1="14" y1="6" x2="14" y2="18.5"/><line x1="17.9" y1="6" x2="17.9" y2="18.5"/></svg>`;
+
   const LEVELS = [
     `
 #####
@@ -140,12 +144,14 @@
         if (boxes.has(k)) {
           const box = document.createElement("div");
           box.className = "box" + (goals.has(k) ? " on-goal" : "");
+          box.innerHTML = CONTAINER_SVG;
           cell.appendChild(box);
         }
 
         if (player.x === x && player.y === y) {
           const p = document.createElement("div");
           p.className = "player";
+          p.innerHTML = PLAYER_SVG;
           cell.appendChild(p);
         }
 
