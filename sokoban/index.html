@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>そうこばん</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#14121c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="そうこばん">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>そうこばん</h1>
+        <p class="tagline">箱を全部、印の上へ押していこう。</p>
+      </div>
+      <div class="scores">
+        <div class="score-box">
+          <span class="score-label">LEVEL</span>
+          <span class="score-value" id="level-num">1/5</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">MOVES</span>
+          <span class="score-value" id="moves">0</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="howto">
+      <span class="howto-icon" aria-hidden="true">📦</span>
+      <p><strong>スワイプか下の矢印ボタンで1マスずつ移動。</strong>箱に体当たりすると押せる。すべての箱を◎の上に置こう。</p>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+      <div class="overlay" id="overlay" hidden>
+        <div class="overlay-message" id="overlay-message"></div>
+        <div class="overlay-sub" id="overlay-sub"></div>
+        <button class="btn" id="overlay-btn">次のレベルへ</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="dpad">
+        <button class="dpad-btn dpad-up" data-dir="U" aria-label="上へ">▲</button>
+        <button class="dpad-btn dpad-left" data-dir="L" aria-label="左へ">◀</button>
+        <button class="dpad-btn dpad-right" data-dir="R" aria-label="右へ">▶</button>
+        <button class="dpad-btn dpad-down" data-dir="D" aria-label="下へ">▼</button>
+      </div>
+      <div class="side-buttons">
+        <button class="btn ghost" id="undo-btn">戻す</button>
+        <button class="btn ghost" id="reset-btn">やり直す</button>
+      </div>
+    </div>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>操作</dt>
+        <dd>盤面をスワイプ、または下の矢印ボタンでプレイヤーが1マス動きます。</dd>
+        <dt>プッシュ</dt>
+        <dd>進む先に箱があり、その先が空いていれば箱を1マス押せます。箱は引けません。</dd>
+        <dt>目標</dt>
+        <dd>すべての箱を「◎」の位置に押し込めばレベルクリア。</dd>
+        <dt>戻す/やり直す</dt>
+        <dd>手詰まりになったら「戻す」で1手前へ、「やり直す」で最初からやり直せます。</dd>
+      </dl>
+    </section>
+
+    <footer>クリアしたレベルは自動で記録されます。</footer>
+  </div>
+
+  <script src="js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("../sw.js"));
+    }
+  </script>
+</body>
+</html>
