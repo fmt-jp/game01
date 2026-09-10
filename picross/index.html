@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>おえかきロジック</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0f1420">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="おえかきロジック">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>おえかきロジック</h1>
+        <p class="tagline">数字をヒントに、マスを塗って絵を完成させよう。</p>
+      </div>
+      <div class="scores">
+        <div class="score-box">
+          <span class="score-label">PUZZLE</span>
+          <span class="score-value" id="level-num">1/5</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="howto">
+      <span class="howto-icon" aria-hidden="true">🎨</span>
+      <p><strong>タテ・ヨコの数字は、連続して塗るマスの数。</strong>数字の順番通りにマスを塗って絵を完成させよう。</p>
+    </div>
+
+    <div class="mode-toggle" role="group" aria-label="入力モード">
+      <button class="mode-btn active" id="mode-fill" data-mode="fill">🖌 ぬる</button>
+      <button class="mode-btn" id="mode-mark" data-mode="mark">✕ しるし</button>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+      <div class="overlay" id="overlay" hidden>
+        <div class="overlay-message" id="overlay-message"></div>
+        <button class="btn" id="overlay-btn">次のパズルへ</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn ghost" id="reset-btn">全部消す</button>
+    </div>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>ヒント</dt>
+        <dd>各行・各列の数字は、その並びで連続して塗るマスの数を表します。複数の数字がある場合は、間に必ず1マス以上の空白が入ります。</dd>
+        <dt>操作</dt>
+        <dd>「ぬる」モードでマスをタップすると黒く塗り、「しるし」モードでタップすると✕印を付けられます（空白と判断したマスの目印）。</dd>
+        <dt>目標</dt>
+        <dd>ヒント通りにすべて塗り終えると、絵が浮かび上がってクリアです。</dd>
+      </dl>
+    </section>
+
+    <footer>クリアしたパズルは自動で記録されます。</footer>
+  </div>
+
+  <script src="js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("../sw.js"));
+    }
+  </script>
+</body>
+</html>
