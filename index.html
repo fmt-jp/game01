@@ -25,6 +25,8 @@
     --gold: #ffcf6b;
     --teal: #35e0c4;
     --violet: #a78bfa;
+    --blue: #4da3ff;
+    --pink: #ff6fae;
 
     --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
     --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
@@ -104,6 +106,8 @@
   .game-card.ember::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--ember), transparent 70%); }
   .game-card.teal::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--teal), transparent 70%); }
   .game-card.violet::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--violet), transparent 70%); }
+  .game-card.blue::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--blue), transparent 70%); }
+  .game-card.pink::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--pink), transparent 70%); }
 
   .preview {
     flex-shrink: 0;
@@ -150,6 +154,35 @@
   }
   .preview.crate-icon svg { width: 60%; height: 60%; color: var(--violet); }
 
+  .preview.nono-grid {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 3px;
+    background: var(--ink-800);
+    padding: 6px;
+  }
+  .preview.nono-grid span { border-radius: 2px; background: rgba(77, 163, 255, 0.18); }
+  .preview.nono-grid span.on { background: var(--blue); }
+
+  .preview.tile-icon {
+    background: var(--ink-800);
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 4px;
+    padding: 6px;
+  }
+  .preview.tile-icon span {
+    border-radius: 4px;
+    background: rgba(255, 111, 174, 0.22);
+    color: var(--pink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.7rem;
+  }
+
   .game-info { flex: 1; min-width: 0; }
 
   .game-info h2 {
@@ -182,6 +215,8 @@
   .game-card.ember .play-arrow { color: var(--ember); }
   .game-card.teal .play-arrow { color: var(--teal); }
   .game-card.violet .play-arrow { color: var(--violet); }
+  .game-card.blue .play-arrow { color: var(--blue); }
+  .game-card.pink .play-arrow { color: var(--pink); }
 
   footer {
     text-align: center;
@@ -230,6 +265,30 @@
         <div class="game-info">
           <h2>そうこばん</h2>
           <p>箱を押してゴールへ。全10レベルの倉庫番パズル。</p>
+        </div>
+        <div class="play-arrow">▶</div>
+      </a>
+
+      <a class="game-card blue" href="picross/index.html">
+        <div class="preview nono-grid">
+          <span></span><span class="on"></span><span></span>
+          <span class="on"></span><span class="on"></span><span class="on"></span>
+          <span></span><span class="on"></span><span></span>
+        </div>
+        <div class="game-info">
+          <h2>おえかきロジック</h2>
+          <p>数字のヒントを頼りにマスを塗って絵を完成させるお絵かきパズル。</p>
+        </div>
+        <div class="play-arrow">▶</div>
+      </a>
+
+      <a class="game-card pink" href="fifteen/index.html">
+        <div class="preview tile-icon">
+          <span>1</span><span>3</span><span>2</span><span>4</span>
+        </div>
+        <div class="game-info">
+          <h2>15パズル</h2>
+          <p>毎回ランダムにシャッフルされる、数字並べ替えスライドパズル。</p>
         </div>
         <div class="play-arrow">▶</div>
       </a>
