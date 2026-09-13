@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>宝石パズル</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0d1a14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="宝石パズル">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>宝石パズル</h1>
+        <p class="tagline">縦・横・斜めに同じ色を3つ揃えて消そう。</p>
+      </div>
+      <div class="scores">
+        <div class="score-box">
+          <span class="score-label">SCORE</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">BEST</span>
+          <span class="score-value" id="best">0</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="howto">
+      <span class="howto-icon" aria-hidden="true">💎</span>
+      <p><strong>落ちてくる3つの宝石を操作。</strong>ボード上をスワイプで左右移動、タップで回転、下スワイプで即落下。</p>
+    </div>
+
+    <div class="board-wrap">
+      <canvas id="board"></canvas>
+      <div class="next-preview" id="next-preview" aria-label="次の宝石">
+        <span class="next-label">NEXT</span>
+        <div class="next-gems" id="next-gems"></div>
+      </div>
+      <div class="overlay" id="overlay" hidden>
+        <div class="overlay-message" id="overlay-message"></div>
+        <div class="overlay-sub" id="overlay-sub"></div>
+        <button class="btn" id="overlay-btn">もう一度</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctrl-btn" id="btn-left" aria-label="左へ">◀</button>
+      <button class="ctrl-btn rotate" id="btn-rotate" aria-label="回転">⟳</button>
+      <button class="ctrl-btn drop" id="btn-drop" aria-label="落下">▼</button>
+      <button class="ctrl-btn" id="btn-right" aria-label="右へ">▶</button>
+    </div>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>操作</dt>
+        <dd>3つ組の宝石が落ちてきます。左右に動かし、回転ボタンで並び順を入れ替えられます。</dd>
+        <dt>消す</dt>
+        <dd>着地すると、同じ色が縦・横・斜めのいずれかに3つ以上つながった部分が消えます。</dd>
+        <dt>連鎖</dt>
+        <dd>消えた後に上の宝石が落ちて、さらに揃うと連鎖でスコアが倍増します。</dd>
+        <dt>ゲームオーバー</dt>
+        <dd>盤面の一番上まで宝石が積み上がると終了。ベストスコアは端末に自動保存されます。</dd>
+      </dl>
+    </section>
+
+    <footer>落下スピードはスコアに応じて少しずつ上がります。</footer>
+  </div>
+
+  <script src="js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("../sw.js"));
+    }
+  </script>
+</body>
+</html>
