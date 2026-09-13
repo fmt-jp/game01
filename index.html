@@ -27,6 +27,7 @@
     --violet: #a78bfa;
     --blue: #4da3ff;
     --pink: #ff6fae;
+    --green: #4ade80;
 
     --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
     --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
@@ -108,6 +109,7 @@
   .game-card.violet::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--violet), transparent 70%); }
   .game-card.blue::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--blue), transparent 70%); }
   .game-card.pink::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--pink), transparent 70%); }
+  .game-card.green::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--green), transparent 70%); }
 
   .preview {
     flex-shrink: 0;
@@ -183,6 +185,23 @@
     font-size: 0.7rem;
   }
 
+  .preview.gem-icon {
+    background: var(--ink-800);
+    align-items: center;
+    justify-items: center;
+    gap: 4px;
+    padding: 8px;
+  }
+  .preview.gem-icon span {
+    display: block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+  }
+  .preview.gem-icon span:nth-child(1) { background: #ff5a5a; }
+  .preview.gem-icon span:nth-child(2) { background: #ffe066; }
+  .preview.gem-icon span:nth-child(3) { background: #74c0fc; }
+
   .game-info { flex: 1; min-width: 0; }
 
   .game-info h2 {
@@ -217,6 +236,7 @@
   .game-card.violet .play-arrow { color: var(--violet); }
   .game-card.blue .play-arrow { color: var(--blue); }
   .game-card.pink .play-arrow { color: var(--pink); }
+  .game-card.green .play-arrow { color: var(--green); }
 
   footer {
     text-align: center;
@@ -289,6 +309,15 @@
         <div class="game-info">
           <h2>15パズル</h2>
           <p>毎回ランダムにシャッフルされる、数字並べ替えスライドパズル。</p>
+        </div>
+        <div class="play-arrow">▶</div>
+      </a>
+
+      <a class="game-card green" href="gems/index.html">
+        <div class="preview gem-icon"><span></span><span></span><span></span></div>
+        <div class="game-info">
+          <h2>宝石パズル</h2>
+          <p>落ちてくる宝石を縦・横・斜めに3つ揃えて消すリアルタイムパズル。</p>
         </div>
         <div class="play-arrow">▶</div>
       </a>
