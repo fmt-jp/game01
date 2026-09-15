@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>バーコードモンスター</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#1c1114">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="バーコードモンスター">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>バーコードモンスター</h1>
+        <p class="tagline">商品のバーコードから相棒モンスターを生み出して対戦しよう。</p>
+      </div>
+    </header>
+
+    <div class="howto">
+      <span class="howto-icon" aria-hidden="true">📷</span>
+      <p><strong>身の回りの商品のバーコードをスキャン。</strong>数字の並びからオリジナルモンスターが誕生します。</p>
+    </div>
+
+    <!-- HOME SCREEN -->
+    <section id="screen-home" class="screen">
+      <button class="btn big" id="scan-main-btn">📷 モンスターをスキャン</button>
+
+      <div class="dex" id="dex-wrap" hidden>
+        <h2>図鑑 <span id="dex-count"></span></h2>
+        <div class="dex-list" id="dex-list"></div>
+      </div>
+    </section>
+
+    <!-- SCANNING SCREEN -->
+    <section id="screen-scan" class="screen" hidden>
+      <div class="scan-frame">
+        <video id="scan-video" playsinline muted></video>
+        <div class="scan-reticle"></div>
+      </div>
+      <p class="scan-status" id="scan-status">カメラを起動しています…</p>
+      <button class="btn ghost" id="scan-cancel-btn">キャンセル</button>
+    </section>
+
+    <!-- MONSTER RESULT SCREEN -->
+    <section id="screen-result" class="screen" hidden>
+      <div class="monster-card" id="result-card"></div>
+      <div class="result-actions">
+        <button class="btn" id="battle-random-btn">ランダムな相手と戦う</button>
+        <button class="btn ghost" id="battle-scan-btn">対戦相手をスキャン</button>
+        <button class="btn ghost" id="result-back-btn">図鑑にもどる</button>
+      </div>
+    </section>
+
+    <!-- BATTLE SCREEN -->
+    <section id="screen-battle" class="screen" hidden>
+      <div class="battle-arena">
+        <div class="fighter" id="fighter-a"></div>
+        <div class="vs">VS</div>
+        <div class="fighter" id="fighter-b"></div>
+      </div>
+      <div class="battle-log" id="battle-log"></div>
+      <div class="battle-result" id="battle-result" hidden></div>
+      <button class="btn" id="battle-again-btn" hidden>図鑑にもどる</button>
+    </section>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>スキャン</dt>
+        <dd>「モンスターをスキャン」から、身の回りの商品パッケージのバーコードを写してください。</dd>
+        <dt>生成</dt>
+        <dd>バーコードの数字の並びから、HP・こうげき力・ぼうぎょ力・すばやさとタイプが決まります。同じ商品なら毎回同じモンスターです。</dd>
+        <dt>対戦</dt>
+        <dd>もう一つスキャンして対戦相手にするか、ランダムな相手と自動で戦えます。すばやさが高い方が先制。</dd>
+        <dt>図鑑</dt>
+        <dd>スキャンしたモンスターは端末に自動保存され、図鑑として一覧できます。</dd>
+      </dl>
+    </section>
+
+    <footer>対応バーコード: EAN-13 / EAN-8 / UPC-A / UPC-E</footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js"></script>
+  <script src="js/monster.js"></script>
+  <script src="js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("../sw.js"));
+    }
+  </script>
+</body>
+</html>
