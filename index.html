@@ -28,6 +28,7 @@
     --blue: #4da3ff;
     --pink: #ff6fae;
     --green: #4ade80;
+    --crimson: #ff4757;
 
     --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
     --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
@@ -110,6 +111,7 @@
   .game-card.blue::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--blue), transparent 70%); }
   .game-card.pink::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--pink), transparent 70%); }
   .game-card.green::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--green), transparent 70%); }
+  .game-card.crimson::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--crimson), transparent 70%); }
 
   .preview {
     flex-shrink: 0;
@@ -202,6 +204,13 @@
   .preview.gem-icon span:nth-child(2) { background: #ffe066; }
   .preview.gem-icon span:nth-child(3) { background: #74c0fc; }
 
+  .preview.barcode-icon {
+    background: var(--ink-800);
+    align-items: center;
+    justify-items: center;
+  }
+  .preview.barcode-icon svg { width: 62%; height: 62%; color: var(--crimson); }
+
   .game-info { flex: 1; min-width: 0; }
 
   .game-info h2 {
@@ -237,6 +246,7 @@
   .game-card.blue .play-arrow { color: var(--blue); }
   .game-card.pink .play-arrow { color: var(--pink); }
   .game-card.green .play-arrow { color: var(--green); }
+  .game-card.crimson .play-arrow { color: var(--crimson); }
 
   footer {
     text-align: center;
@@ -318,6 +328,20 @@
         <div class="game-info">
           <h2>宝石パズル</h2>
           <p>落ちてくる宝石を縦・横・斜めに3つ揃えて消すリアルタイムパズル。</p>
+        </div>
+        <div class="play-arrow">▶</div>
+      </a>
+
+      <a class="game-card crimson" href="barcode/index.html">
+        <div class="preview barcode-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square">
+            <path d="M3 4v16"/><path d="M6.5 4v16"/><path d="M9 4v16"/><path d="M12 4v16" stroke-width="2.6"/>
+            <path d="M14.5 4v16"/><path d="M17 4v16" stroke-width="2.6"/><path d="M21 4v16"/>
+          </svg>
+        </div>
+        <div class="game-info">
+          <h2>バーコードモンスター</h2>
+          <p>商品のバーコードをスキャンしてモンスターを生成、対戦させよう。</p>
         </div>
         <div class="play-arrow">▶</div>
       </a>
