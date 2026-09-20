@@ -1,4 +1,4 @@
-const CACHE_NAME = "pocket-arcade-v5";
+const CACHE_NAME = "pocket-arcade-v6";
 
 const APP_SHELL = [
   "./",
@@ -35,6 +35,11 @@ const APP_SHELL = [
   "./barcode/css/style.css",
   "./barcode/js/monster.js",
   "./barcode/js/game.js",
+  "./flow/",
+  "./flow/index.html",
+  "./flow/css/style.css",
+  "./flow/js/puzzle.js",
+  "./flow/js/game.js",
 ];
 
 self.addEventListener("install", (event) => {

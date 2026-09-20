@@ -29,6 +29,7 @@
     --pink: #ff6fae;
     --green: #4ade80;
     --crimson: #ff4757;
+    --amber: #fbbf24;
 
     --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
     --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
@@ -112,6 +113,7 @@
   .game-card.pink::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--pink), transparent 70%); }
   .game-card.green::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--green), transparent 70%); }
   .game-card.crimson::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--crimson), transparent 70%); }
+  .game-card.amber::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--amber), transparent 70%); }
 
   .preview {
     flex-shrink: 0;
@@ -211,6 +213,13 @@
   }
   .preview.barcode-icon svg { width: 62%; height: 62%; color: var(--crimson); }
 
+  .preview.flow-icon {
+    background: var(--ink-800);
+    align-items: center;
+    justify-items: center;
+  }
+  .preview.flow-icon svg { width: 72%; height: 72%; }
+
   .game-info { flex: 1; min-width: 0; }
 
   .game-info h2 {
@@ -247,6 +256,7 @@
   .game-card.pink .play-arrow { color: var(--pink); }
   .game-card.green .play-arrow { color: var(--green); }
   .game-card.crimson .play-arrow { color: var(--crimson); }
+  .game-card.amber .play-arrow { color: var(--amber); }
 
   footer {
     text-align: center;
@@ -342,6 +352,24 @@
         <div class="game-info">
           <h2>バーコードモンスター</h2>
           <p>商品のバーコードをスキャンしてモンスターを生成、対戦させよう。</p>
+        </div>
+        <div class="play-arrow">▶</div>
+      </a>
+
+      <a class="game-card amber" href="flow/index.html">
+        <div class="preview flow-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6">
+            <path d="M6 7 H17 V13" stroke="#fbbf24"/>
+            <circle cx="6" cy="7" r="2.4" fill="#fbbf24" stroke="none"/>
+            <circle cx="17" cy="13" r="2.4" fill="#fbbf24" stroke="none"/>
+            <path d="M6 18 H13" stroke="#4da3ff"/>
+            <circle cx="6" cy="18" r="2.4" fill="#4da3ff" stroke="none"/>
+            <circle cx="13" cy="18" r="2.4" fill="#4da3ff" stroke="none"/>
+          </svg>
+        </div>
+        <div class="game-info">
+          <h2>ラインつなぎ</h2>
+          <p>同じ色の点を線でつないで全マスを埋める、ランダム生成パズル。</p>
         </div>
         <div class="play-arrow">▶</div>
       </a>
