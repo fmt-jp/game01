@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ラインつなぎ</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#16150f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ラインつなぎ">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>ラインつなぎ</h1>
+        <p class="tagline">同じ色の点を線でつないで、全部のマスを埋めよう。</p>
+      </div>
+      <div class="scores">
+        <div class="score-box">
+          <span class="score-label">LEVEL</span>
+          <span class="score-value" id="level">1</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">CLEAR</span>
+          <span class="score-value" id="cleared">0</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="howto">
+      <span class="howto-icon" aria-hidden="true">🖍</span>
+      <p><strong>同じ色の点から点へ指でなぞる。</strong>線どうしは交差できません。すべてのマスを線で埋めたらクリア。</p>
+    </div>
+
+    <div class="board-wrap">
+      <canvas id="board"></canvas>
+      <div class="overlay" id="overlay" hidden>
+        <div class="overlay-message" id="overlay-message"></div>
+        <div class="overlay-sub" id="overlay-sub"></div>
+        <button class="btn" id="overlay-btn">次のパズルへ</button>
+      </div>
+    </div>
+
+    <div class="status">
+      <div class="status-item">
+        <span class="status-label">つながり</span>
+        <span class="status-value" id="pairs-status">0/0</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">うめたマス</span>
+        <span class="status-value" id="fill-status">0/0</span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn ghost" id="reset-btn">線を全部消す</button>
+      <button class="btn ghost" id="new-btn">別のパズル</button>
+    </div>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>つなぐ</dt>
+        <dd>同じ色の点のどちらかから指を置き、そのまま隣のマスへなぞると線が伸びます。相手の点まで届けば1組完成です。</dd>
+        <dt>交差しない</dt>
+        <dd>線は交差できません。他の色の線の上をなぞると、その線はそこで切れてしまいます。</dd>
+        <dt>クリア条件</dt>
+        <dd>すべての色をつなぎ、さらに盤面のマスをすべて線で埋めるとクリアです。</dd>
+        <dt>やり直し</dt>
+        <dd>線をなぞり直せば引き直せます。点をタップするとその色の線は消えます。</dd>
+      </dl>
+    </section>
+
+    <footer>パズルは毎回ランダム生成。レベルが上がると盤面が広くなります。</footer>
+  </div>
+
+  <script src="js/puzzle.js"></script>
+  <script src="js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("../sw.js"));
+    }
+  </script>
+</body>
+</html>
