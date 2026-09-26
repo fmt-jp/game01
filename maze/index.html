@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>めいろ探検</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="めいろ探検">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>めいろ探検</h1>
+        <p class="tagline">手さぐりで道をさがして、出口を目指そう。</p>
+      </div>
+      <div class="scores">
+        <div class="score-box">
+          <span class="score-label">LEVEL</span>
+          <span class="score-value" id="level">1</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">TIME</span>
+          <span class="score-value" id="timer">0:00</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">BEST</span>
+          <span class="score-value" id="best">--:--</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="howto">
+      <span class="howto-icon" aria-hidden="true">🔦</span>
+      <p><strong>スワイプした方向へ、曲がり角まで一気に進みます。</strong>見えるのは明かりの届く範囲だけ。通った道は地図に残ります。</p>
+    </div>
+
+    <div class="board-wrap">
+      <canvas id="board"></canvas>
+      <div class="overlay" id="overlay" hidden>
+        <div class="overlay-message" id="overlay-message"></div>
+        <div class="overlay-sub" id="overlay-sub"></div>
+        <button class="btn" id="overlay-btn">次の迷路へ</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctrl-btn" id="btn-up" aria-label="上へ">▲</button>
+      <button class="ctrl-btn" id="btn-left" aria-label="左へ">◀</button>
+      <button class="ctrl-btn" id="btn-down" aria-label="下へ">▼</button>
+      <button class="ctrl-btn" id="btn-right" aria-label="右へ">▶</button>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn ghost" id="new-btn">別の迷路</button>
+    </div>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>進む</dt>
+        <dd>盤面をスワイプ、または下のボタンでその方向へ移動します。一本道はそのまま走り抜け、分かれ道や行き止まりで止まります。</dd>
+        <dt>明かり</dt>
+        <dd>見えるのは自分の周りと、まっすぐ見通せる通路の先だけ。一度通った道は薄く地図として残ります。</dd>
+        <dt>ゴール</dt>
+        <dd>光る出口までたどり着けばクリア。出口の位置は最初から分かっているので、道を探すのが勝負です。</dd>
+        <dt>記録</dt>
+        <dd>迷路の大きさごとのベストタイムが端末に保存されます。</dd>
+      </dl>
+    </section>
+
+    <footer>迷路は毎回ランダム生成。レベルが上がると広くなります。</footer>
+  </div>
+
+  <script src="js/maze.js"></script>
+  <script src="js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("../sw.js"));
+    }
+  </script>
+</body>
+</html>
