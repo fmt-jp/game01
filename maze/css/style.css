@@ -53,6 +53,32 @@ body {
 .howto p { margin: 0; font-size: 0.76rem; line-height: 1.5; color: var(--muted); }
 .howto strong { color: var(--paper); font-weight: 500; }
 
+.status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 9px 13px;
+}
+.status-keys { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.status-fuel { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.status-icon { font-size: 0.95rem; line-height: 1; }
+.status-value {
+  font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem;
+  color: var(--paper); font-variant-numeric: tabular-nums; min-width: 2.2em; text-align: right;
+}
+.fuel-bar {
+  flex: 1; min-width: 0; height: 9px; border-radius: 999px;
+  background: rgba(232, 241, 255, 0.10); overflow: hidden;
+}
+.fuel-fill {
+  height: 100%; width: 100%; border-radius: 999px;
+  background: var(--accent);
+  transition: width 90ms linear, background 200ms linear;
+}
+
 .board-wrap {
   position: relative;
   width: calc(100% + 36px);
@@ -74,6 +100,7 @@ body {
 .overlay[hidden] { display: none; }
 .overlay-message { font-family: var(--font-display); font-size: 1.5rem; font-weight: 900; color: var(--gold); }
 .overlay-sub { font-family: var(--font-mono); font-size: 0.9rem; color: var(--muted); margin-bottom: 6px; }
+.overlay .btn[hidden] { display: none; }
 
 .controls {
   display: grid;

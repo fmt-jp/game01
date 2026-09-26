@@ -19,7 +19,7 @@
     <header class="masthead">
       <div>
         <h1>めいろ探検</h1>
-        <p class="tagline">手さぐりで道をさがして、出口を目指そう。</p>
+        <p class="tagline">鍵を集めて、明かりが尽きる前に出口へ。</p>
       </div>
       <div class="scores">
         <div class="score-box">
@@ -37,9 +37,21 @@
       </div>
     </header>
 
+    <div class="status">
+      <div class="status-keys">
+        <span class="status-icon" aria-hidden="true">🔑</span>
+        <span class="status-value" id="key-status">0/3</span>
+      </div>
+      <div class="status-fuel">
+        <span class="status-icon" aria-hidden="true">🔦</span>
+        <div class="fuel-bar"><div class="fuel-fill" id="fuel-fill"></div></div>
+        <span class="status-value" id="fuel-status">0</span>
+      </div>
+    </div>
+
     <div class="howto">
-      <span class="howto-icon" aria-hidden="true">🔦</span>
-      <p><strong>スワイプした方向へ、曲がり角まで一気に進みます。</strong>見えるのは明かりの届く範囲だけ。通った道は地図に残ります。</p>
+      <span class="howto-icon" aria-hidden="true">🗝️</span>
+      <p><strong>鍵をすべて拾うと出口が開きます。</strong>歩くたびランタンの燃料が減り、尽きると真っ暗。行き止まりに落ちている油で回復します。</p>
     </div>
 
     <div class="board-wrap">
@@ -48,6 +60,7 @@
         <div class="overlay-message" id="overlay-message"></div>
         <div class="overlay-sub" id="overlay-sub"></div>
         <button class="btn" id="overlay-btn">次の迷路へ</button>
+        <button class="btn ghost" id="overlay-alt-btn" hidden>新しい迷路にする</button>
       </div>
     </div>
 
@@ -66,17 +79,21 @@
       <h2>遊び方</h2>
       <dl>
         <dt>進む</dt>
-        <dd>盤面をスワイプ、または下のボタンでその方向へ移動します。一本道はそのまま走り抜け、分かれ道や行き止まりで止まります。</dd>
+        <dd>盤面をスワイプ、または下のボタンでその方向へ移動します。一本道はそのまま走り抜け、分かれ道・鍵・油・行き止まりで止まります。</dd>
+        <dt>鍵</dt>
+        <dd>🔑 は迷路の四方に散らばっています。すべて拾うまで出口は灰色のまま閉じたきり。全部そろうと金色に光って開きます。</dd>
+        <dt>ランタン</dt>
+        <dd>1歩ごとに燃料が1減ります。残りが3割を切ると見える範囲が狭まり、尽きるとその場で行き止まり。ゲージの色が警告です。</dd>
+        <dt>油</dt>
+        <dd>🔥 の油は行き止まりに置かれています。寄り道する余裕があるか、燃料と鍵の位置をにらみながら決めましょう。</dd>
         <dt>明かり</dt>
-        <dd>見えるのは自分の周りと、まっすぐ見通せる通路の先だけ。一度通った道は薄く地図として残ります。</dd>
-        <dt>ゴール</dt>
-        <dd>光る出口までたどり着けばクリア。出口の位置は最初から分かっているので、道を探すのが勝負です。</dd>
+        <dd>見えるのは自分の周りと、まっすぐ見通せる通路の先だけ。一度通った道と見かけたアイテムは地図に残ります。</dd>
         <dt>記録</dt>
         <dd>迷路の大きさごとのベストタイムが端末に保存されます。</dd>
       </dl>
     </section>
 
-    <footer>迷路は毎回ランダム生成。レベルが上がると広くなります。</footer>
+    <footer>迷路・鍵・油は毎回ランダム配置。レベルが上がると広くなります。</footer>
   </div>
 
   <script src="js/maze.js"></script>
