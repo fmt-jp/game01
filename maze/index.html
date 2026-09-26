@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>めいろ探検</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="めいろ探検">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>めいろ探検</h1>
+        <p class="tagline">鍵を集めて、明かりが尽きる前に出口へ。</p>
+      </div>
+      <div class="scores">
+        <div class="score-box">
+          <span class="score-label">LEVEL</span>
+          <span class="score-value" id="level">1</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">TIME</span>
+          <span class="score-value" id="timer">0:00</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">BEST</span>
+          <span class="score-value" id="best">--:--</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="status">
+      <div class="status-keys">
+        <span class="status-icon" aria-hidden="true">🔑</span>
+        <span class="status-value" id="key-status">0/3</span>
+      </div>
+      <div class="status-fuel">
+        <span class="status-icon" aria-hidden="true">🔦</span>
+        <div class="fuel-bar"><div class="fuel-fill" id="fuel-fill"></div></div>
+        <span class="status-value" id="fuel-status">0</span>
+      </div>
+    </div>
+
+    <div class="howto">
+      <span class="howto-icon" aria-hidden="true">🗝️</span>
+      <p><strong>鍵をすべて拾うと出口が開きます。</strong>歩くたびランタンの燃料が減り、尽きると真っ暗。行き止まりに落ちている油で回復します。</p>
+    </div>
+
+    <div class="board-wrap">
+      <canvas id="board"></canvas>
+      <div class="overlay" id="overlay" hidden>
+        <div class="overlay-message" id="overlay-message"></div>
+        <div class="overlay-sub" id="overlay-sub"></div>
+        <button class="btn" id="overlay-btn">次の迷路へ</button>
+        <button class="btn ghost" id="overlay-alt-btn" hidden>新しい迷路にする</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctrl-btn" id="btn-up" aria-label="上へ">▲</button>
+      <button class="ctrl-btn" id="btn-left" aria-label="左へ">◀</button>
+      <button class="ctrl-btn" id="btn-down" aria-label="下へ">▼</button>
+      <button class="ctrl-btn" id="btn-right" aria-label="右へ">▶</button>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn ghost" id="new-btn">別の迷路</button>
+    </div>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>進む</dt>
+        <dd>盤面をスワイプ、または下のボタンでその方向へ移動します。一本道はそのまま走り抜け、分かれ道・鍵・油・行き止まりで止まります。</dd>
+        <dt>鍵</dt>
+        <dd>🔑 は迷路の四方に散らばっています。すべて拾うまで出口は灰色のまま閉じたきり。全部そろうと金色に光って開きます。</dd>
+        <dt>ランタン</dt>
+        <dd>1歩ごとに燃料が1減ります。残りが3割を切ると見える範囲が狭まり、尽きるとその場で行き止まり。ゲージの色が警告です。</dd>
+        <dt>油</dt>
+        <dd>🔥 の油は行き止まりに置かれています。寄り道する余裕があるか、燃料と鍵の位置をにらみながら決めましょう。</dd>
+        <dt>明かり</dt>
+        <dd>見えるのは自分の周りと、まっすぐ見通せる通路の先だけ。一度通った道と見かけたアイテムは地図に残ります。</dd>
+        <dt>記録</dt>
+        <dd>迷路の大きさごとのベストタイムが端末に保存されます。</dd>
+      </dl>
+    </section>
+
+    <footer>迷路・鍵・油は毎回ランダム配置。レベルが上がると広くなります。</footer>
+  </div>
+
+  <script src="js/maze.js"></script>
+  <script src="js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("../sw.js"));
+    }
+  </script>
+</body>
+</html>
