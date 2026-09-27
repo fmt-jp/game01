@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>きょだい迷路</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="きょだい迷路">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>きょだい迷路</h1>
+        <p class="tagline">木の壁の中を歩いて、スタンプを集めてゴールへ。</p>
+      </div>
+      <div class="scores">
+        <div class="score-box">
+          <span class="score-label">LEVEL</span>
+          <span class="score-value" id="level">1</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">TIME</span>
+          <span class="score-value" id="timer">0:00</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">BEST</span>
+          <span class="score-value" id="best">--:--</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="stamp-card">
+      <span class="stamp-title">スタンプ</span>
+      <div class="stamp-slots" id="stamp-slots"></div>
+    </div>
+
+    <div class="howto">
+      <span class="howto-icon" aria-hidden="true">🪵</span>
+      <p><strong>左半分をなぞると歩き、右半分をなぞると見まわせます。</strong>スタンプを全部押すとゴールの扉が開きます。やぐらに登れば迷路を見渡せます。</p>
+    </div>
+
+    <div class="view-wrap">
+      <canvas id="view"></canvas>
+      <div class="joystick" id="joystick" hidden><div class="knob" id="knob"></div></div>
+      <div class="toast" id="toast" hidden></div>
+      <div class="lookout" id="lookout" hidden>
+        <p class="lookout-title">やぐらの上</p>
+        <canvas id="map"></canvas>
+        <button class="btn" id="descend-btn">おりる</button>
+      </div>
+      <div class="overlay" id="overlay" hidden>
+        <div class="overlay-message" id="overlay-message"></div>
+        <div class="overlay-sub" id="overlay-sub"></div>
+        <button class="btn" id="overlay-btn">次の迷路へ</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctrl-btn" id="btn-forward" aria-label="前へ">▲</button>
+      <button class="ctrl-btn" id="btn-left" aria-label="左をむく">◀</button>
+      <button class="ctrl-btn" id="btn-back" aria-label="後ろへ">▼</button>
+      <button class="ctrl-btn" id="btn-right" aria-label="右をむく">▶</button>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn ghost" id="new-btn">別の迷路</button>
+    </div>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>歩く</dt>
+        <dd>画面の左半分を指でなぞると、その向きに歩きます。下のボタン（長押し）でも前後・左右の向き変えができます。</dd>
+        <dt>見まわす</dt>
+        <dd>画面の右半分を横になぞると、体の向きが変わります。上部の方位（北・東・南・西）が今どちらを向いているかの手がかりです。</dd>
+        <dt>スタンプ</dt>
+        <dd>迷路の中に立っているスタンプ台に近づくと自動で押されます。全部そろうまでゴールの扉は閉まったままです。</dd>
+        <dt>やぐら</dt>
+        <dd>緑の屋根のやぐらに入ると登って迷路全体を見渡せます。自分の位置・残りスタンプ・ゴールが分かりますが、その間も時間は進みます。</dd>
+        <dt>記録</dt>
+        <dd>迷路の大きさごとのベストタイムが端末に保存されます。</dd>
+      </dl>
+    </section>
+
+    <footer>迷路は毎回ランダム生成。行き止まりだけでなく回り道もあるので、壁づたいでは解けません。</footer>
+  </div>
+
+  <script src="js/maze3d.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("../sw.js"));
+    }
+  </script>
+</body>
+</html>
