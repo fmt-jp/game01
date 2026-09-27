@@ -261,9 +261,12 @@ const MazeView = (() => {
         const rdx = dirX + planeX * cameraX;
         const rdy = dirY + planeY * cameraX;
         const hit = Maze3D.castRay(maze, camera.x, camera.y, rdx, rdy);
-        // Distance along the view axis, not to the eye: using the eye distance
-        // is what bows straight walls into a fisheye.
-        const perp = Math.max(0.0001, hit.dist * (dirX * rdx + dirY * rdy) / (rdx * rdx + rdy * rdy));
+        // Depth along the view axis, not distance to the eye: the eye distance
+        // is what bows straight walls into a fisheye. castRay returns the ray
+        // parameter t, so the depth is t times the ray's component along the
+        // view direction -- which is exactly 1 here, because the ray is built
+        // as dir + plane*cameraX and plane is perpendicular to the unit dir.
+        const perp = Math.max(0.0001, hit.dist * (dirX * rdx + dirY * rdy));
         depth[i] = perp;
 
         // Pixels per world unit: the width spans 2*tan(FOV/2) units at this
