@@ -31,6 +31,7 @@
     --crimson: #ff4757;
     --amber: #fbbf24;
     --sky: #38bdf8;
+    --timber: #d99a5b;
 
     --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
     --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
@@ -116,6 +117,7 @@
   .game-card.crimson::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--crimson), transparent 70%); }
   .game-card.amber::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--amber), transparent 70%); }
   .game-card.sky::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--sky), transparent 70%); }
+  .game-card.timber::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--timber), transparent 70%); }
 
   .preview {
     flex-shrink: 0;
@@ -229,6 +231,13 @@
   }
   .preview.maze-icon svg { width: 74%; height: 74%; }
 
+  .preview.corridor-icon {
+    background: var(--ink-800);
+    align-items: center;
+    justify-items: center;
+  }
+  .preview.corridor-icon svg { width: 82%; height: 82%; }
+
   .game-info { flex: 1; min-width: 0; }
 
   .game-info h2 {
@@ -267,6 +276,7 @@
   .game-card.crimson .play-arrow { color: var(--crimson); }
   .game-card.amber .play-arrow { color: var(--amber); }
   .game-card.sky .play-arrow { color: var(--sky); }
+  .game-card.timber .play-arrow { color: var(--timber); }
 
   footer {
     text-align: center;
@@ -396,6 +406,27 @@
         <div class="game-info">
           <h2>めいろ探検</h2>
           <p>鍵を集めて出口を開け、ランタンが尽きる前に脱出する暗闇の迷路。</p>
+        </div>
+        <div class="play-arrow">▶</div>
+      </a>
+      <a class="game-card timber" href="maze3d/index.html">
+        <div class="preview corridor-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M2 2 L9.5 9 V15 L2 22 Z" fill="#b9803f"/>
+            <path d="M22 2 L14.5 9 V15 L22 22 Z" fill="#8d5f2d"/>
+            <path d="M2 22 L9.5 15 H14.5 L22 22 Z" fill="#3f6b3c"/>
+            <path d="M2 2 L9.5 9 H14.5 L22 2 Z" fill="#5fa2cd"/>
+            <g stroke-width="0.7" opacity="0.5">
+              <path d="M2 8.5 L9.5 11.2 M2 15.5 L9.5 12.8" stroke="#5f3f1c"/>
+              <path d="M22 8.5 L14.5 11.2 M22 15.5 L14.5 12.8" stroke="#5f3f1c"/>
+            </g>
+            <rect x="9.5" y="9" width="5" height="6" fill="#d99a5b"/>
+            <rect x="10.6" y="10.4" width="2.8" height="2.4" rx="0.4" fill="#ff5a5a"/>
+          </svg>
+        </div>
+        <div class="game-info">
+          <h2>きょだい迷路</h2>
+          <p>一人称で歩く3Dの木塀迷路。スタンプを集めてゴールの扉を開けよう。</p>
         </div>
         <div class="play-arrow">▶</div>
       </a>
