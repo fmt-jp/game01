@@ -6,6 +6,24 @@ https://fmt-jp.github.io/game01/ and installable as a PWA.
 `index.html` at the root is the hub that links to every game. Each game lives in
 its own directory and is self-contained.
 
+## What is here
+
+Ten games, all on `main` and live. Service worker at `pocket-arcade-v9`; the
+whole site, every game included, works offline once visited.
+
+| Directory | Name | Kind | Worth knowing |
+|---|---|---|---|
+| `2048/` | 2048 | slide | a bot plays it, to show 2048 is actually reachable |
+| `stack/` | つみあげ | one-handed action | tap to drop, timing based |
+| `sokoban/` | そうこばん | box pushing | 10 levels, each proven solvable by BFS |
+| `picross/` | おえかきロジック | nonogram | only boards with a unique solution are used |
+| `fifteen/` | 15パズル | slide | random every time, parity-checked as solvable |
+| `gems/` | 宝石パズル | falling blocks | Columns-like, real time |
+| `barcode/` | バーコードモンスター | camera | a product barcode makes a monster; battles; a 図鑑 |
+| `flow/` | ラインつなぎ | line drawing | generated, with a solution guaranteed to exist |
+| `maze/` | めいろ探検 | 2D maze | keys gate the exit, lantern fuel drains per step |
+| `maze3d/` | きょだい迷路 | 3D first person | own raycaster, stamp rally, lookout tower |
+
 ## Ground rules
 
 - **No build step, no framework, no bundler.** Plain HTML, CSS and JavaScript,
@@ -59,9 +77,9 @@ every check), or `tests/run.sh maze3d` for one game. Each check prints its own
 results and exits non-zero on failure.
 
 Most of these print their findings for a person to read rather than asserting;
-`tests/README.md` says which ones decide for themselves. A green `run.sh` means
-"nothing crashed" for the rest. Turning them into assertions is outstanding
-work, and a new check should be written to assert from the start.
+`tests/README.md` says which ones decide for themselves, and *Outstanding work*
+below treats fixing that as the first job. A new check should assert from the
+start.
 
 The approach that has actually caught bugs here: **generate in the browser,
 verify from outside it.**
@@ -83,12 +101,29 @@ Seed `Math.random` before the page loads to reproduce a specific board. Anything
 drawn at load time (textures, scenery) must therefore use its own generator, not
 `Math.random`, or seeding the page shifts the game's own sequence.
 
-## Known limitations
+## Outstanding work
 
-- `barcode/index.html` loads ZXing from a CDN as a fallback for browsers without
-  `BarcodeDetector` (notably iOS Safari). It is the only external dependency,
-  and it means scanning does not work offline on those browsers. Vendoring the
-  library would fix it.
+Nothing here is a known bug — the games all work. These are the things a next
+session would most usefully pick up, roughly in that order.
+
+1. **Fifteen of the eighteen checks cannot fail.** They print findings a person
+   read at the time instead of asserting. `tests/README.md` names them. Until
+   they are converted, a green `tests/run.sh` means "nothing crashed" for those
+   games. Worth doing one game at a time.
+2. **`barcode/` depends on a CDN.** It loads ZXing as a fallback for browsers
+   without `BarcodeDetector` (notably iOS Safari), which is the only external
+   dependency in the repository and means scanning does not work offline on
+   those browsers. Vendoring the library would fix it; documenting it as a
+   limitation is the cheaper alternative.
+3. **`maze3d/` has no floor texture**, so in open spaces there is little sense
+   of movement — the walls carry it alone. Floor casting at reduced resolution
+   would work without costing the frame budget. Also, a tower is only visible in
+   line of sight: the depth buffer is per column, so its roof cannot be seen
+   over a fence.
+4. **`barcode/`'s 図鑑 is read-only.** You cannot pick a monster from it to
+   fight with; only the one just scanned can battle.
+5. **The hub is ten cards long** and only grows. Sorting, grouping or a filter
+   will be wanted before long.
 
 ## Pitfalls already hit here
 
