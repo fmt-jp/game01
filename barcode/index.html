@@ -33,7 +33,9 @@
       <button class="btn big" id="scan-main-btn">📷 モンスターをスキャン</button>
 
       <div class="dex" id="dex-wrap" hidden>
-        <h2>図鑑 <span id="dex-count"></span></h2>
+        <h2>図鑑 <span id="dex-count"></span>
+          <button class="dex-edit" id="dex-edit-btn">編集</button>
+        </h2>
         <div class="dex-list" id="dex-list"></div>
       </div>
     </section>
@@ -81,10 +83,17 @@
         <dd>もう一つスキャンして対戦相手にするか、ランダムな相手と自動で戦えます。すばやさが高い方が先制。</dd>
         <dt>図鑑</dt>
         <dd>スキャンしたモンスターは端末に自動保存され、図鑑として一覧できます。</dd>
+        <dt>削除</dt>
+        <dd>図鑑の「編集」を押すと各モンスターに ✕ が出ます。消した直後は「もとにもどす」で元の位置に戻せます。</dd>
       </dl>
     </section>
 
     <footer>対応バーコード: EAN-13 / EAN-8 / UPC-A / UPC-E</footer>
+  </div>
+
+  <div class="undo-toast" id="undo-toast" hidden>
+    <span id="undo-text"></span>
+    <button class="undo-btn" id="undo-btn">もとにもどす</button>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js"></script>

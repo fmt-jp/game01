@@ -66,10 +66,44 @@ body {
 .dex h2 span { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted-dim); font-weight: 400; }
 .dex-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .dex-item {
+  position: relative;
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px;
   display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: default;
 }
 .dex-item canvas { width: 44px; height: 44px; }
+.dex-edit {
+  margin-left: auto; appearance: none; background: transparent; border: 1px solid var(--line);
+  color: var(--muted); font-family: var(--font-body); font-size: 0.68rem; font-weight: 700;
+  padding: 4px 12px; border-radius: 999px; cursor: pointer;
+}
+.dex-edit[hidden] { display: none; }
+.dex-edit:active { background: var(--panel); }
+.dex-edit.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.dex-remove {
+  position: absolute; top: -7px; right: -7px; width: 26px; height: 26px; border-radius: 50%;
+  appearance: none; border: 2px solid var(--ink-900); background: var(--accent); color: #fff;
+  font-size: 0.8rem; line-height: 1; padding: 0; cursor: pointer;
+  display: none; align-items: center; justify-content: center;
+}
+.dex-list.editing .dex-item { position: relative; }
+.dex-list.editing .dex-remove { display: flex; }
+.dex-remove:active { background: var(--accent-dim); }
+
+.undo-toast {
+  position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom));
+  transform: translateX(-50%); z-index: 20;
+  display: flex; align-items: center; gap: 12px; white-space: nowrap;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+  padding: 8px 8px 8px 16px; font-size: 0.78rem; color: var(--paper);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8);
+}
+.undo-toast[hidden] { display: none; }
+.undo-btn {
+  appearance: none; border: none; background: var(--accent); color: #fff; font-family: var(--font-body);
+  font-weight: 700; font-size: 0.75rem; padding: 7px 14px; border-radius: 999px; cursor: pointer;
+}
+.undo-btn:active { background: var(--accent-dim); }
 .dex-item .dex-name { font-size: 0.62rem; font-weight: 700; color: var(--paper); text-align: center; }
 .dex-item .dex-type { font-size: 0.56rem; color: var(--muted-dim); }
 

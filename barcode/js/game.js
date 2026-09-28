@@ -28,17 +28,26 @@
   const dexWrap = document.getElementById("dex-wrap");
   const dexList = document.getElementById("dex-list");
   const dexCount = document.getElementById("dex-count");
+  const dexEditBtn = document.getElementById("dex-edit-btn");
+  const undoToast = document.getElementById("undo-toast");
+  const undoText = document.getElementById("undo-text");
+  const undoBtn = document.getElementById("undo-btn");
 
   let currentMonster = null;
   let mediaStream = null;
   let zxingReader = null;
   let detectRAF = null;
   let scanMode = "new"; // "new" | "opponent"
+  let editingDex = false;
+  let pendingUndo = null;   // the last deletion, until the toast goes away
+  let undoTimer = null;
 
   function showScreen(name) {
     for (const key in screens) {
       screens[key].hidden = key !== name;
     }
+    // the undo offer belongs to the 図鑑; leaving it takes the offer with it
+    if (name !== "home") hideUndo();
   }
 
   function loadDex() {
@@ -70,9 +79,16 @@
   function renderDex() {
     const list = loadDex();
     dexWrap.hidden = list.length === 0;
+    if (list.length === 0) editingDex = false;
     dexCount.textContent = list.length ? `(${list.length})` : "";
+    dexEditBtn.textContent = editingDex ? "完了" : "編集";
+    dexEditBtn.classList.toggle("on", editingDex);
+    dexList.classList.toggle("editing", editingDex);
     dexList.innerHTML = "";
-    for (const m of list) {
+    for (const entry of list) {
+      // Draw from the barcode, not from what was saved: entries stored by an
+      // older version predate some of the traits the artwork now uses.
+      const m = MonsterGen.fromCode(entry.code);
       const item = document.createElement("div");
       item.className = "dex-item";
       const canvas = document.createElement("canvas");
@@ -85,9 +101,52 @@
       type.className = "dex-type";
       type.textContent = m.type;
       item.appendChild(type);
+
+      const remove = document.createElement("button");
+      remove.className = "dex-remove";
+      remove.type = "button";
+      remove.textContent = "✕";
+      remove.setAttribute("aria-label", `${m.name} を削除`);
+      remove.addEventListener("click", () => removeFromDex(entry.code));
+      item.appendChild(remove);
+
       dexList.appendChild(item);
-      requestAnimationFrame(() => MonsterGen.draw(canvas, { ...m, maxHp: m.hp }));
+      requestAnimationFrame(() => MonsterGen.draw(canvas, m));
     }
+  }
+
+  function removeFromDex(code) {
+    const list = loadDex();
+    const index = list.findIndex((m) => m.code === code);
+    if (index === -1) return;
+    const [entry] = list.splice(index, 1);
+    saveDex(list);
+    renderDex();
+    offerUndo(entry, index);
+  }
+
+  function offerUndo(entry, index) {
+    pendingUndo = { entry, index };
+    undoText.textContent = `${entry.name} を削除しました`;
+    undoToast.hidden = false;
+    clearTimeout(undoTimer);
+    undoTimer = setTimeout(hideUndo, 7000);
+  }
+
+  function hideUndo() {
+    clearTimeout(undoTimer);
+    undoTimer = null;
+    pendingUndo = null;
+    undoToast.hidden = true;
+  }
+
+  function undoRemove() {
+    if (!pendingUndo) return;
+    const list = loadDex();
+    list.splice(Math.min(pendingUndo.index, list.length), 0, pendingUndo.entry);
+    saveDex(list);
+    hideUndo();
+    renderDex();
   }
 
   function renderMonsterCard(container, monster) {
@@ -240,6 +299,12 @@
       startBattle(currentMonster, opponent);
     }
   }
+
+  dexEditBtn.addEventListener("click", () => {
+    editingDex = !editingDex;
+    renderDex();
+  });
+  undoBtn.addEventListener("click", undoRemove);
 
   scanMainBtn.addEventListener("click", () => startScan("new"));
   battleScanBtn.addEventListener("click", () => startScan("opponent"));
