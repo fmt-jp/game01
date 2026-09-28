@@ -1,0 +1,7 @@
+# screenshots the checks take, and stray ones at the root
+tests/_shots/
+/*.png
+
+# python bytecode
+__pycache__/
+*.pyc
