@@ -8,6 +8,18 @@
 set -u
 cd "$(dirname "$0")/.."
 
+# Whichever interpreter actually has playwright: the system python3 often does
+# not, and a missing import looks like a broken check rather than a setup gap.
+PY=""
+for candidate in python3 python3.13 python3.12 python3.11; do
+  command -v "$candidate" >/dev/null 2>&1 || continue
+  if "$candidate" -c "import playwright" >/dev/null 2>&1; then PY="$candidate"; break; fi
+done
+if [ -z "$PY" ]; then
+  echo "no python with playwright found. pip install playwright" >&2
+  exit 1
+fi
+
 PORT=8390
 python3 -m http.server "$PORT" >/dev/null 2>&1 &
 SERVER=$!
@@ -24,7 +36,7 @@ for check in tests/test_*.py; do
   [ -n "$filter" ] && case "$check" in *"$filter"*) ;; *) continue ;; esac
   echo
   echo "=== $check ==="
-  python3 "$check" || { echo "--- FAILED: $check"; failed=1; }
+  "$PY" "$check" || { echo "--- FAILED: $check"; failed=1; }
 done
 
 echo
