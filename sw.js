@@ -1,4 +1,4 @@
-const CACHE_NAME = "pocket-arcade-v9";
+const CACHE_NAME = "pocket-arcade-v10";
 
 const APP_SHELL = [
   "./",
@@ -51,6 +51,12 @@ const APP_SHELL = [
   "./maze3d/js/maze3d.js",
   "./maze3d/js/render.js",
   "./maze3d/js/game.js",
+  "./words/",
+  "./words/index.html",
+  "./words/css/style.css",
+  "./words/js/dict.js",
+  "./words/js/puzzle.js",
+  "./words/js/game.js",
 ];
 
 self.addEventListener("install", (event) => {

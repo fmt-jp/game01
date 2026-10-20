@@ -33,10 +33,11 @@ with sync_playwright() as pw:
 
     cards = p.locator(".game-card")
     n = cards.count()
-    check("the hub lists 10 games", n == 10, f"found {n}")
+    check("the hub lists 11 games", n == 11, f"found {n}")
     hrefs = [cards.nth(i).get_attribute("href") for i in range(n)]
     check("めいろ探検 is on the hub", "maze/index.html" in hrefs, str(hrefs))
     check("きょだい迷路 is on the hub", "maze3d/index.html" in hrefs, str(hrefs))
+    check("ことばの輪 is on the hub", "words/index.html" in hrefs, str(hrefs))
     titles = [cards.nth(i).locator("h2").inner_text() for i in range(n)]
     print("     ", " / ".join(titles))
     check("no horizontal overflow on the hub",
@@ -45,6 +46,8 @@ with sync_playwright() as pw:
           p.locator(".preview.maze-icon svg").count() == 1)
     check("the 3D maze card has its icon",
           p.locator(".preview.corridor-icon svg").count() == 1)
+    check("the word game card has its icon",
+          p.locator(".preview.wheel-icon svg").count() == 1)
     p.screenshot(path=f"{SHOTS}/hub.png", full_page=True)
 
     # each card opens a game that boots without errors
@@ -68,14 +71,14 @@ with sync_playwright() as pw:
       const c = await caches.open(keys[0]);
       return {keys, entries: (await c.keys()).length};
     }""")
-    check("the service worker cached the v9 shell",
-          version["keys"] == ["pocket-arcade-v9"] and version["entries"] >= len([s for s in shell if s]),
+    check("the service worker cached the v10 shell",
+          version["keys"] == ["pocket-arcade-v10"] and version["entries"] >= len([s for s in shell if s]),
           str(version))
 
     c.set_offline(True)
     p.goto(BASE + "/index.html")
     p.wait_for_timeout(600)
-    check("the hub loads offline", p.locator(".game-card").count() == 10)
+    check("the hub loads offline", p.locator(".game-card").count() == 11)
     p.goto(BASE + "/maze/index.html")
     p.wait_for_timeout(900)
     check("めいろ探検 loads offline",
@@ -105,6 +108,20 @@ with sync_playwright() as pw:
           abs(moved["x"] - pos["x"]) + abs(moved["y"] - pos["y"]) > 0.2
           or abs(moved["angle"] - pos["angle"]) > 0.1,
           f"{pos['x']:.2f},{pos['y']:.2f} -> {moved['x']:.2f},{moved['y']:.2f}")
+
+    # the word game ships a 100 KB dictionary: make sure it cached too
+    p.goto(BASE + "/words/index.html")
+    p.wait_for_timeout(900)
+    check("ことばの輪 loads offline",
+          p.evaluate("() => typeof window.__words === 'function'")
+          and p.evaluate("() => WordDict.size") > 5000,
+          str(p.evaluate("() => (window.WordDict || {}).size")))
+    first = p.evaluate("() => window.__words().entries[0].word")
+    p.evaluate("(w) => window.__spell(w)", first)
+    p.wait_for_timeout(300)
+    check("and is playable offline",
+          p.evaluate("() => window.__words().solved") == [first],
+          str(p.evaluate("() => window.__words().solved")))
     p.screenshot(path=f"{SHOTS}/maze_offline.png")
     c.set_offline(False)
     check("no page errors", not [e for e in errs if "ERR_" not in e], str(errs))

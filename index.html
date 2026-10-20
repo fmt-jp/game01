@@ -32,6 +32,7 @@
     --amber: #fbbf24;
     --sky: #38bdf8;
     --timber: #d99a5b;
+    --orchid: #e879f9;
 
     --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
     --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
@@ -118,6 +119,7 @@
   .game-card.amber::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--amber), transparent 70%); }
   .game-card.sky::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--sky), transparent 70%); }
   .game-card.timber::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--timber), transparent 70%); }
+  .game-card.orchid::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--orchid), transparent 70%); }
 
   .preview {
     flex-shrink: 0;
@@ -238,6 +240,13 @@
   }
   .preview.corridor-icon svg { width: 82%; height: 82%; }
 
+  .preview.wheel-icon {
+    background: var(--ink-800);
+    align-items: center;
+    justify-items: center;
+  }
+  .preview.wheel-icon svg { width: 78%; height: 78%; }
+
   .game-info { flex: 1; min-width: 0; }
 
   .game-info h2 {
@@ -277,6 +286,7 @@
   .game-card.amber .play-arrow { color: var(--amber); }
   .game-card.sky .play-arrow { color: var(--sky); }
   .game-card.timber .play-arrow { color: var(--timber); }
+  .game-card.orchid .play-arrow { color: var(--orchid); }
 
   footer {
     text-align: center;
@@ -427,6 +437,26 @@
         <div class="game-info">
           <h2>きょだい迷路</h2>
           <p>一人称で歩く3Dの木塀迷路。スタンプを集めてゴールの扉を開けよう。</p>
+        </div>
+        <div class="play-arrow">▶</div>
+      </a>
+      <a class="game-card orchid" href="words/index.html">
+        <div class="preview wheel-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9.2" stroke="#e879f9" stroke-opacity="0.28" stroke-width="1.2"/>
+            <path d="M12 4.4 L5.1 15.2 L18.9 15.2" stroke="#e879f9" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="4.4" r="2.6" fill="#e879f9"/>
+            <circle cx="5.1" cy="15.2" r="2.6" fill="#e879f9"/>
+            <circle cx="18.9" cy="15.2" r="2.6" fill="#e879f9"/>
+            <circle cx="19.6" cy="8.2" r="2.1" fill="#f1eef7" fill-opacity="0.35"/>
+            <circle cx="4.4" cy="8.2" r="2.1" fill="#f1eef7" fill-opacity="0.35"/>
+            <circle cx="12" cy="19.6" r="2.1" fill="#f1eef7" fill-opacity="0.35"/>
+          </svg>
+        </div>
+        <div class="game-info">
+          <h2>ことばの輪</h2>
+          <p>かな文字の輪をなぞって言葉を作り、クロスワードのマスを埋めよう。</p>
         </div>
         <div class="play-arrow">▶</div>
       </a>

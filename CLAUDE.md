@@ -8,8 +8,8 @@ its own directory and is self-contained.
 
 ## What is here
 
-Ten games, all on `main` and live. Service worker at `pocket-arcade-v9`; the
-whole site, every game included, works offline once visited.
+Eleven games, all on `main` and live. Service worker at `pocket-arcade-v10`;
+the whole site, every game included, works offline once visited.
 
 | Directory | Name | Kind | Worth knowing |
 |---|---|---|---|
@@ -23,6 +23,7 @@ whole site, every game included, works offline once visited.
 | `flow/` | ラインつなぎ | line drawing | generated, with a solution guaranteed to exist |
 | `maze/` | めいろ探検 | 2D maze | keys gate the exit, lantern fuel drains per step |
 | `maze3d/` | きょだい迷路 | 3D first person | own raycaster, stamp rally, lookout tower |
+| `words/` | ことばの輪 | word puzzle | trace a kana wheel to fill a generated crossword |
 
 ## Ground rules
 
@@ -45,8 +46,8 @@ Shared across every game, so the collection reads as one thing:
 - Fonts: Zen Maru Gothic (display), Noto Sans JP (body), JetBrains Mono
   (numerals), all from Google Fonts.
 - A dark ground, with **one accent colour per game**. Taken so far: ember, gold,
-  teal, violet, blue, pink, green, crimson, amber, sky, timber. A new game picks
-  a new one and uses it for its own page and for its hub card.
+  teal, violet, blue, pink, green, crimson, amber, sky, timber, orchid. A new
+  game picks a new one and uses it for its own page and for its hub card.
 - The same page furniture in the same order: masthead with score boxes, a 遊び方
   one-liner, the board, the controls, then a 遊び方 section at the bottom.
 - Real-time games render to a canvas scaled by `devicePixelRatio`; grid games
@@ -101,12 +102,16 @@ Seed `Math.random` before the page loads to reproduce a specific board. Anything
 drawn at load time (textures, scenery) must therefore use its own generator, not
 `Math.random`, or seeding the page shifts the game's own sequence.
 
+`run.sh` picks whichever interpreter has playwright installed; the system
+`python3` often does not, and a missing import otherwise looks like a broken
+check rather than a setup gap.
+
 ## Outstanding work
 
 Nothing here is a known bug — the games all work. These are the things a next
 session would most usefully pick up, roughly in that order.
 
-1. **Fifteen of the eighteen checks cannot fail.** They print findings a person
+1. **Fifteen of the twenty checks cannot fail.** They print findings a person
    read at the time instead of asserting. `tests/README.md` names them. Until
    they are converted, a green `tests/run.sh` means "nothing crashed" for those
    games. Worth doing one game at a time.
@@ -122,8 +127,13 @@ session would most usefully pick up, roughly in that order.
    over a fence.
 4. **`barcode/`'s 図鑑 is read-only.** You cannot pick a monster from it to
    fight with; only the one just scanned can battle.
-5. **The hub is ten cards long** and only grows. Sorting, grouping or a filter
-   will be wanted before long.
+5. **The hub is eleven cards long** and only grows. Sorting, grouping or a
+   filter will be wanted before long.
+6. **`words/` draws its base words from a finite pool** — roughly 1,400 five and
+   six kana words survive the variety rule — so the boards are generated but not
+   literally endless. Building the wheel from a letter set rather than a single
+   word would widen it, at the cost of the promise that one answer uses every
+   letter.
 
 ## Pitfalls already hit here
 
