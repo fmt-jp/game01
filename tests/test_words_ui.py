@@ -77,6 +77,30 @@ with sync_playwright() as pw:
         check("the letters are big enough to hit", min(l["size"] for l in centres) >= 44,
               f"smallest {min(l['size'] for l in centres)}")
 
+        # An unopened square has to read as a square. It was once 7% white on a
+        # near-black page, which left it all but invisible.
+        contrast = page.evaluate("""() => {
+          const parse = (css) => {
+            const n = css.match(/[\\d.]+/g).map(Number);
+            return {r: n[0], g: n[1], b: n[2], a: n.length > 3 ? n[3] : 1};
+          };
+          const over = (top, bottom) => ({
+            r: bottom.r + (top.r - bottom.r) * top.a,
+            g: bottom.g + (top.g - bottom.g) * top.a,
+            b: bottom.b + (top.b - bottom.b) * top.a,
+          });
+          const lum = (c) => 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
+          const page = parse(getComputedStyle(document.body).backgroundColor);
+          const closed = document.querySelector(".cell:not(.blank):not(.open)");
+          const shut = over(parse(getComputedStyle(closed).backgroundColor), page);
+          const open = over(parse("rgba(241, 238, 247, 1)"), page);
+          return {closed: lum(shut) - lum(page), open: lum(open) - lum(shut)};
+        }""")
+        check("an unopened square stands out from the page behind it",
+              contrast["closed"] >= 18, f"only {contrast['closed']:.1f} brighter")
+        check("and an opened one still reads as a different thing entirely",
+              contrast["open"] >= 100, f"{contrast['open']:.1f}")
+
         state = page.evaluate("() => window.__words()")
         word = [e["word"] for e in state["entries"]][0]
         check("a real drag across the wheel finds a word", drag_word(page, word))
