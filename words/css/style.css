@@ -1,0 +1,140 @@
+:root {
+  --ink-900: #0b1220;
+  --ink-800: #141d31;
+  --panel: #1a2338;
+  --paper: #f1eef7;
+  --muted: #a7a3c0;
+  --muted-dim: #6d6a88;
+  --accent: #e879f9;
+  --accent-dim: #c14fd4;
+  --gold: #ffcf6b;
+  --line: rgba(241, 238, 247, 0.10);
+
+  --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+  --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; overscroll-behavior: none; }
+
+body {
+  background: var(--ink-900);
+  background-image:
+    radial-gradient(ellipse 620px 420px at 84% -8%, rgba(232, 121, 249, 0.15), transparent 60%),
+    radial-gradient(ellipse 520px 380px at 0% 12%, rgba(255, 207, 107, 0.07), transparent 55%);
+  color: var(--paper);
+  font-family: var(--font-body);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.page { width: 100%; max-width: 460px; padding: 24px 18px 40px; display: flex; flex-direction: column; gap: 14px; }
+
+.masthead { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+.masthead h1 {
+  margin: 0; font-family: var(--font-display); font-weight: 900;
+  font-size: clamp(1.3rem, 6vw, 1.7rem);
+  line-height: 1.1; color: var(--paper); white-space: nowrap;
+}
+.tagline { margin: 6px 0 0; font-size: 0.78rem; color: var(--muted); max-width: 22ch; }
+
+.scores { display: flex; gap: 6px; flex-shrink: 0; }
+.score-box {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 6px 9px; display: flex; flex-direction: column; align-items: center; min-width: 50px;
+}
+.score-label { font-size: 0.54rem; font-weight: 700; color: var(--muted-dim); letter-spacing: 0.06em; }
+.score-value { font-family: var(--font-mono); font-weight: 700; font-size: 0.9rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+.howto { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.howto-icon { font-size: 1.3rem; flex-shrink: 0; }
+.howto p { margin: 0; font-size: 0.76rem; line-height: 1.5; color: var(--muted); }
+.howto strong { color: var(--paper); font-weight: 500; }
+
+.board-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+  padding: 10px 0;
+}
+
+.grid { display: grid; gap: 3px; }
+.cell {
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700;
+  /* An empty square has to read as a square against a very dark page: at a
+     lower alpha it sinks into the background and the shape of the crossword
+     disappears. */
+  background: rgba(241, 238, 247, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(241, 238, 247, 0.16);
+  color: transparent;
+  transition: background 220ms ease, color 220ms ease, transform 220ms ease;
+}
+.cell.blank { background: transparent; box-shadow: none; }
+.cell.open { background: var(--paper); color: var(--ink-900); box-shadow: none; }
+.cell.hinted { background: rgba(255, 207, 107, 0.85); color: var(--ink-900); box-shadow: none; }
+.cell.pop { animation: pop 320ms ease; }
+@keyframes pop {
+  0% { transform: scale(0.5); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+.overlay {
+  position: absolute; inset: -6px; background: rgba(11, 18, 32, 0.95); display: flex;
+  flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  text-align: center; padding: 16px; border-radius: 14px;
+}
+.overlay[hidden] { display: none; }
+.overlay-message { font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; color: var(--gold); }
+.overlay-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 6px; }
+
+.current {
+  text-align: center; font-family: var(--font-display); font-weight: 700;
+  font-size: 1.5rem; letter-spacing: 0.18em; min-height: 1.9rem; color: var(--paper);
+}
+.current.good { color: #7ef0a6; }
+.current.bonus { color: var(--gold); }
+.current.bad { color: #ff7d7d; animation: shake 320ms ease; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-7px); }
+  75% { transform: translateX(7px); }
+}
+
+.wheel-wrap { position: relative; align-self: center; touch-action: none; }
+#trace { position: absolute; inset: 0; pointer-events: none; }
+.wheel { position: relative; }
+.letter {
+  position: absolute; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--panel); border: 1px solid var(--line);
+  font-family: var(--font-display); font-weight: 700; color: var(--paper);
+  user-select: none; transition: background 120ms ease, transform 120ms ease;
+}
+.letter.on { background: var(--accent); color: var(--ink-900); transform: scale(1.08); }
+
+.btn {
+  appearance: none; border: none; background: var(--accent); color: var(--ink-900); font-family: var(--font-body);
+  font-weight: 700; font-size: 0.85rem; padding: 10px 20px; border-radius: 999px; white-space: nowrap; cursor: pointer;
+}
+.btn:active { background: var(--accent-dim); }
+.btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--paper); padding: 9px 16px; font-size: 0.78rem; }
+.btn.ghost:active { background: var(--panel); }
+.btn[disabled] { opacity: 0.4; }
+
+.toolbar { display: flex; justify-content: center; gap: 10px; }
+
+.about { border-top: 1px solid var(--line); padding-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.about h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--paper); }
+.about dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; font-size: 0.8rem; line-height: 1.6; }
+.about dt { font-family: var(--font-mono); font-weight: 700; color: var(--accent); white-space: nowrap; }
+.about dd { margin: 0; color: var(--muted); }
+
+footer { text-align: center; font-size: 0.68rem; color: var(--muted-dim); }

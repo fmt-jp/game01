@@ -22,10 +22,11 @@ Not unit tests. Each one drives the real page in a real browser and checks the
 result from outside it — see the *Checking the work* section of `CLAUDE.md` for
 why they are written that way.
 
-Two of them are shared machinery rather than checks: `sokoban_solver.py`,
+Some files are shared machinery rather than checks: `sokoban_solver.py`,
 `picross_solver.py` and `astar15.py` are the independent solvers the game checks
-compare against, and `autopilot.js` steers きょだい迷路 through its own key
-handlers.
+compare against, `autopilot.js` steers きょだい迷路 through its own key handlers,
+and `build_words.py` regenerates ことばの輪's word list (it needs `janome` and
+`wordfreq`, which the checks themselves do not).
 
 ## Self-checking, versus printing for a person to read
 
@@ -35,6 +36,8 @@ handlers.
 - `test_barcode.py`
 - `test_maze3d.py`
 - `test_maze_play.py`
+- `test_words.py`
+- `test_words_ui.py`
 
 **These print their findings and always exit 0.** They were written to answer a
 question during development, and a person read the output. `run.sh` will not
