@@ -8,7 +8,7 @@ its own directory and is self-contained.
 
 ## What is here
 
-Eleven games, all on `main` and live. Service worker at `pocket-arcade-v10`;
+Twelve games, all on `main` and live. Service worker at `pocket-arcade-v11`;
 the whole site, every game included, works offline once visited.
 
 | Directory | Name | Kind | Worth knowing |
@@ -24,6 +24,7 @@ the whole site, every game included, works offline once visited.
 | `maze/` | めいろ探検 | 2D maze | keys gate the exit, lantern fuel drains per step |
 | `maze3d/` | きょだい迷路 | 3D first person | own raycaster, stamp rally, lookout tower |
 | `words/` | ことばの輪 | word puzzle | trace a kana wheel to fill a generated crossword |
+| `ataxx/` | ふえる石 | board game vs AI | clone or jump, converting what you land beside |
 
 ## Ground rules
 
@@ -46,8 +47,8 @@ Shared across every game, so the collection reads as one thing:
 - Fonts: Zen Maru Gothic (display), Noto Sans JP (body), JetBrains Mono
   (numerals), all from Google Fonts.
 - A dark ground, with **one accent colour per game**. Taken so far: ember, gold,
-  teal, violet, blue, pink, green, crimson, amber, sky, timber, orchid. A new
-  game picks a new one and uses it for its own page and for its hub card.
+  teal, violet, blue, pink, green, crimson, amber, sky, timber, orchid, lime.
+  A new game picks a new one and uses it for its own page and for its hub card.
 - The same page furniture in the same order: masthead with score boxes, a 遊び方
   one-liner, the board, the controls, then a 遊び方 section at the bottom.
 - Real-time games render to a canvas scaled by `devicePixelRatio`; grid games
@@ -111,7 +112,7 @@ check rather than a setup gap.
 Nothing here is a known bug — the games all work. These are the things a next
 session would most usefully pick up, roughly in that order.
 
-1. **Fifteen of the twenty checks cannot fail.** They print findings a person
+1. **Fifteen of the twenty-two checks cannot fail.** They print findings a person
    read at the time instead of asserting. `tests/README.md` names them. Until
    they are converted, a green `tests/run.sh` means "nothing crashed" for those
    games. Worth doing one game at a time.
@@ -127,7 +128,7 @@ session would most usefully pick up, roughly in that order.
    over a fence.
 4. **`barcode/`'s 図鑑 is read-only.** You cannot pick a monster from it to
    fight with; only the one just scanned can battle.
-5. **The hub is eleven cards long** and only grows. Sorting, grouping or a
+5. **The hub is twelve cards long** and only grows. Sorting, grouping or a
    filter will be wanted before long.
 6. **`words/` draws its base words from a finite pool** — roughly 1,400 five and
    six kana words survive the variety rule — so the boards are generated but not
@@ -149,3 +150,10 @@ session would most usefully pick up, roughly in that order.
 - A canvas that has never been painted produces a `captureStream()` that never
   becomes ready, so `video.play()` hangs. Paint something first when mocking a
   camera in a test.
+- A `for...of` over a `Set` visits entries added while it runs. Expanding a set
+  of cells in place therefore floods the whole board; iterate a snapshot.
+- Anything that hands the turn over on a timer must close the input at the
+  moment the move is made, not when the timer fires. `ataxx/` let a second tap
+  in during that gap, which started a second chain of scheduled turns and had
+  the opponent moving twice in a row. Checks that only play politely, one move
+  at a time, will not see it.

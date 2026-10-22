@@ -33,6 +33,7 @@
     --sky: #38bdf8;
     --timber: #d99a5b;
     --orchid: #e879f9;
+    --lime: #a3e635;
 
     --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
     --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
@@ -120,6 +121,7 @@
   .game-card.sky::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--sky), transparent 70%); }
   .game-card.timber::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--timber), transparent 70%); }
   .game-card.orchid::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--orchid), transparent 70%); }
+  .game-card.lime::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--lime), transparent 70%); }
 
   .preview {
     flex-shrink: 0;
@@ -247,6 +249,13 @@
   }
   .preview.wheel-icon svg { width: 78%; height: 78%; }
 
+  .preview.stones-icon {
+    background: var(--ink-800);
+    align-items: center;
+    justify-items: center;
+  }
+  .preview.stones-icon svg { width: 80%; height: 80%; }
+
   .game-info { flex: 1; min-width: 0; }
 
   .game-info h2 {
@@ -287,6 +296,7 @@
   .game-card.sky .play-arrow { color: var(--sky); }
   .game-card.timber .play-arrow { color: var(--timber); }
   .game-card.orchid .play-arrow { color: var(--orchid); }
+  .game-card.lime .play-arrow { color: var(--lime); }
 
   footer {
     text-align: center;
@@ -457,6 +467,27 @@
         <div class="game-info">
           <h2>ことばの輪</h2>
           <p>かな文字の輪をなぞって言葉を作り、クロスワードのマスを埋めよう。</p>
+        </div>
+        <div class="play-arrow">▶</div>
+      </a>
+      <a class="game-card lime" href="ataxx/index.html">
+        <div class="preview stones-icon">
+          <svg viewBox="0 0 24 24">
+            <g fill="rgba(238, 246, 230, 0.09)">
+              <rect x="2" y="2" width="9" height="9" rx="2.4"/>
+              <rect x="13" y="2" width="9" height="9" rx="2.4"/>
+              <rect x="2" y="13" width="9" height="9" rx="2.4"/>
+              <rect x="13" y="13" width="9" height="9" rx="2.4"/>
+            </g>
+            <circle cx="6.5" cy="6.5" r="3.2" fill="#a3e635"/>
+            <circle cx="17.5" cy="17.5" r="3.2" fill="#60a5fa"/>
+            <circle cx="17.5" cy="6.5" r="1.5" fill="#a3e635" fill-opacity="0.85"/>
+            <circle cx="6.5" cy="17.5" r="1.5" fill="#a3e635" fill-opacity="0.85"/>
+          </svg>
+        </div>
+        <div class="game-info">
+          <h2>ふえる石</h2>
+          <p>となりに増やすか跳んで動くか。着地のまわりの相手の石を全部うばう対戦ゲーム。</p>
         </div>
         <div class="play-arrow">▶</div>
       </a>
