@@ -7,6 +7,7 @@ import sys
 
 from playwright.sync_api import sync_playwright
 from _common import CHROMIUM, SHOTS
+from ataxx_rules import CELLS, FOE, YOU, explain
 
 BASE = "http://localhost:8390"
 failures = []
@@ -79,6 +80,52 @@ with sync_playwright() as pw:
                 nowc = page.evaluate("() => window.__ataxx()")
                 check("tapping out of range changes nothing",
                       nowc["cells"] == before and nowc["picked"] == -1)
+
+        # Tapping again while the opponent is still thinking must not get a
+        # second move in. It used to, and the stray turn put two chains of play
+        # against each other, so the opponent answered twice running — which
+        # looks exactly like a stone jumping further than the rules allow.
+        page.evaluate("""() => {
+          window.__trace = [];
+          const snap = () => {
+            const s = window.__ataxx();
+            const key = s.cells.join("");
+            const last = window.__trace[window.__trace.length - 1];
+            if (!last || last.key !== key) window.__trace.push({key, cells: s.cells});
+            requestAnimationFrame(snap);
+          };
+          snap();
+        }""")
+        for _ in range(10):
+            s = page.evaluate("() => window.__ataxx()")
+            if s["over"]:
+                break
+            if s["turn"] == YOU and not s["busy"] and s["yourMoves"]:
+                m = s["yourMoves"][0]
+                tap(page, m["from"])
+                tap(page, m["to"])
+                page.wait_for_timeout(120)
+                impatient = page.evaluate("() => window.__ataxx()")
+                if impatient["yourMoves"]:
+                    m2 = impatient["yourMoves"][-1]
+                    tap(page, m2["from"])
+                    tap(page, m2["to"])
+            page.wait_for_timeout(900)
+        trace = page.evaluate("() => window.__trace.map(t => t.cells)")
+        sides, strange = [], 0
+        for i in range(1, len(trace)):
+            what = explain(trace[i - 1], trace[i])
+            if what is None:
+                strange += 1
+            else:
+                sides.append(what[0])
+        doubles = sum(1 for i in range(1, len(sides)) if sides[i] == sides[i - 1])
+        check("every change to the board is one legal move", strange == 0,
+              f"{strange} of {len(trace) - 1} transitions were not")
+        check("nobody ever moves twice in a row, however fast you tap",
+              doubles == 0, f"{doubles} double moves in {len(sides)}")
+        print(f"      {len(sides)} moves watched while tapping ahead")
+        page.evaluate("() => { window.__trace = []; }")
 
         page.click('.level-btn[data-level="hard"]')
         page.wait_for_timeout(600)

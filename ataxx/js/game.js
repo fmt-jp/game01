@@ -29,6 +29,15 @@
   let turn = YOU;
   let busy = false;
   let over = false;
+  let timer = null;
+
+  // The game advances through exactly one pending step. Scheduling a new one
+  // cancels whatever was waiting, so a stray tap cannot leave two chains of
+  // turns running against each other.
+  function later(fn, ms) {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => { timer = null; fn(); }, ms);
+  }
 
   function squareSize() {
     const available = boardEl.parentElement.clientWidth - 4;
@@ -123,17 +132,18 @@
   // One side's move, then hand over. A side with no move passes, which is how
   // the winner ends up filling the rest of the board.
   function advance() {
-    if (Ataxx.isOver(cells)) { finish(); return; }
+    if (Ataxx.isOver(cells)) { busy = false; finish(); return; }
     if (Ataxx.legalMoves(cells, turn).length === 0) {
       announce(turn === YOU ? "打てる手がないのでパス" : "あいてはパス");
       turn = turn === YOU ? FOE : YOU;
-      setTimeout(() => { if (!over) advance(); }, 800);
+      busy = true;
+      later(() => { if (!over) advance(); }, 800);
       return;
     }
     if (turn === FOE) {
       busy = true;
       updateHud();
-      setTimeout(playOpponent, 260);
+      later(playOpponent, 260);
     } else {
       busy = false;
       updateHud();
@@ -144,9 +154,12 @@
     const result = Ataxx.applyMove(cells, move, side);
     cells = result.cells;
     clearChoices();
+    // Shut the board immediately. Waiting until advance() runs left a window in
+    // which a second tap played another move, and the turn order came apart.
+    busy = true;
     paint({ placed: move.to, flipped: result.flipped });
     turn = side === YOU ? FOE : YOU;
-    setTimeout(() => { if (!over) advance(); }, 320);
+    later(() => { if (!over) advance(); }, 320);
   }
 
   function playOpponent() {
@@ -156,7 +169,7 @@
   }
 
   boardEl.addEventListener("click", (event) => {
-    if (busy || over) return;
+    if (busy || over || turn !== YOU) return;
     const node = event.target.closest(".square");
     if (!node) return;
     const i = Number(node.dataset.index);
@@ -174,6 +187,7 @@
   });
 
   function newGame() {
+    if (timer) { clearTimeout(timer); timer = null; }
     cells = Ataxx.newBoard();
     picked = -1;
     turn = YOU;

@@ -11,11 +11,10 @@ from collections import Counter
 
 from playwright.sync_api import sync_playwright
 from _common import CHROMIUM, SHOTS
+from ataxx_rules import (CELLS, EMPTY, FOE, SIZE, WALL, YOU, apply_move, counts,
+                         is_over, legal_moves, winner)
 
 BASE = "http://localhost:8390"
-SIZE = 7
-CELLS = SIZE * SIZE
-EMPTY, YOU, FOE, WALL = 0, 1, 2, 3
 failures = []
 
 
@@ -23,74 +22,6 @@ def check(label, ok, detail=""):
     print(("  ok   " if ok else "  FAIL ") + label + (f"  {detail}" if detail and not ok else ""))
     if not ok:
         failures.append(f"{label}: {detail}")
-
-
-# ---------- the rules, written here from the description ----------
-
-def rc(i):
-    return divmod(i, SIZE)
-
-
-def around(i, reach):
-    r, c = rc(i)
-    out = []
-    for dr in range(-reach, reach + 1):
-        for dc in range(-reach, reach + 1):
-            if dr == 0 and dc == 0:
-                continue
-            if max(abs(dr), abs(dc)) != reach:
-                continue
-            nr, nc = r + dr, c + dc
-            if 0 <= nr < SIZE and 0 <= nc < SIZE:
-                out.append(nr * SIZE + nc)
-    return out
-
-
-NEAR = [around(i, 1) for i in range(CELLS)]
-FAR = [around(i, 2) for i in range(CELLS)]
-
-
-def legal_moves(cells, side):
-    moves = set()
-    for src in range(CELLS):
-        if cells[src] != side:
-            continue
-        for dst in NEAR[src]:
-            if cells[dst] == EMPTY:
-                moves.add((src, dst, True))
-        for dst in FAR[src]:
-            if cells[dst] == EMPTY:
-                moves.add((src, dst, False))
-    return moves
-
-
-def apply_move(cells, src, dst, clone, side):
-    out = list(cells)
-    if not clone:
-        out[src] = EMPTY
-    out[dst] = side
-    foe = FOE if side == YOU else YOU
-    for n in NEAR[dst]:
-        if out[n] == foe:
-            out[n] = side
-    return out
-
-
-def counts(cells):
-    c = Counter(cells)
-    return {"you": c[YOU], "foe": c[FOE], "empty": c[EMPTY]}
-
-
-def is_over(cells):
-    n = counts(cells)
-    if n["you"] == 0 or n["foe"] == 0 or n["empty"] == 0:
-        return True
-    return not legal_moves(cells, YOU) and not legal_moves(cells, FOE)
-
-
-def winner(cells):
-    n = counts(cells)
-    return 0 if n["you"] == n["foe"] else (YOU if n["you"] > n["foe"] else FOE)
 
 
 # Plays whole games in the page and records every step, for replay out here.
