@@ -1,0 +1,149 @@
+:root {
+  --ink-900: #0b1220;
+  --ink-800: #121c2c;
+  --panel: #18243a;
+  --paper: #eef6e6;
+  --muted: #9fb09a;
+  --muted-dim: #6b7a68;
+  --accent: #a3e635;
+  --accent-dim: #7fb524;
+  --foe: #60a5fa;
+  --foe-dim: #3b82f6;
+  --gold: #ffcf6b;
+  --line: rgba(238, 246, 230, 0.10);
+
+  --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+  --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; overscroll-behavior: none; }
+
+body {
+  background: var(--ink-900);
+  background-image:
+    radial-gradient(ellipse 620px 420px at 84% -8%, rgba(163, 230, 53, 0.13), transparent 60%),
+    radial-gradient(ellipse 520px 380px at 0% 12%, rgba(96, 165, 250, 0.10), transparent 55%);
+  color: var(--paper);
+  font-family: var(--font-body);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.page { width: 100%; max-width: 460px; padding: 24px 18px 40px; display: flex; flex-direction: column; gap: 13px; }
+
+.masthead { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+.masthead h1 {
+  margin: 0; font-family: var(--font-display); font-weight: 900;
+  font-size: clamp(1.3rem, 6vw, 1.7rem); line-height: 1.1; color: var(--paper); white-space: nowrap;
+}
+.tagline { margin: 6px 0 0; font-size: 0.78rem; color: var(--muted); max-width: 22ch; }
+
+.scores { display: flex; gap: 6px; flex-shrink: 0; }
+.score-box {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 6px 9px; display: flex; flex-direction: column; align-items: center; min-width: 50px;
+}
+.score-label { font-size: 0.54rem; font-weight: 700; color: var(--muted-dim); letter-spacing: 0.06em; }
+.score-value { font-family: var(--font-mono); font-weight: 700; font-size: 0.9rem; color: var(--paper); font-variant-numeric: tabular-nums; }
+.score-box.you .score-value { color: var(--accent); }
+.score-box.foe .score-value { color: var(--foe); }
+
+.turn {
+  text-align: center; font-family: var(--font-display); font-weight: 700; font-size: 0.92rem;
+  color: var(--muted); min-height: 1.4rem;
+}
+.turn.you { color: var(--accent); }
+.turn.foe { color: var(--foe); }
+
+.board-wrap { position: relative; display: flex; justify-content: center; }
+
+.board { display: grid; gap: 3px; touch-action: manipulation; }
+.square {
+  border-radius: 7px;
+  background: rgba(238, 246, 230, 0.07);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  cursor: pointer;
+}
+.square.wall { background: rgba(238, 246, 230, 0.22); cursor: default; }
+
+.stone {
+  width: 78%; height: 78%; border-radius: 50%;
+  transition: transform 160ms ease, background 220ms ease, box-shadow 160ms ease;
+}
+.stone.you { background: radial-gradient(circle at 34% 30%, #d4f78a, var(--accent) 62%, #6f9f1c); }
+.stone.foe { background: radial-gradient(circle at 34% 30%, #bcd9ff, var(--foe) 62%, #2563eb); }
+.stone.flip { animation: flip 360ms ease; }
+.stone.drop { animation: drop 260ms ease; }
+@keyframes flip {
+  0% { transform: scale(1) rotate(0deg); }
+  45% { transform: scale(0.55) rotate(180deg); }
+  100% { transform: scale(1) rotate(360deg); }
+}
+@keyframes drop {
+  0% { transform: scale(0.2); opacity: 0.4; }
+  70% { transform: scale(1.12); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.square.picked { background: rgba(163, 230, 53, 0.3); }
+.square.picked .stone { box-shadow: 0 0 0 3px var(--accent); }
+.square.clone::after, .square.jump::after {
+  content: ""; position: absolute; border-radius: 50%;
+  width: 46%; height: 46%;
+}
+/* A smaller dot than a stone, so a place you may play is never mistaken for a
+   stone already there. */
+.square.clone::after { width: 30%; height: 30%; background: rgba(163, 230, 53, 0.8); }
+.square.jump::after { border: 2.5px dashed rgba(163, 230, 53, 0.75); }
+
+.overlay {
+  position: absolute; inset: -8px; background: rgba(11, 18, 32, 0.95); display: flex;
+  flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  text-align: center; padding: 18px; border-radius: 14px;
+}
+.overlay[hidden] { display: none; }
+.overlay-message { font-family: var(--font-display); font-size: 1.5rem; font-weight: 900; color: var(--gold); }
+.overlay-sub { font-family: var(--font-mono); font-size: 0.9rem; color: var(--muted); margin-bottom: 6px; }
+
+.toolbar { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.levels { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.level-btn {
+  appearance: none; border: none; background: transparent; color: var(--muted);
+  font-family: var(--font-body); font-weight: 700; font-size: 0.76rem;
+  padding: 8px 14px; cursor: pointer;
+}
+.level-btn.on { background: var(--accent); color: var(--ink-900); }
+
+.btn {
+  appearance: none; border: none; background: var(--accent); color: var(--ink-900); font-family: var(--font-body);
+  font-weight: 700; font-size: 0.85rem; padding: 10px 20px; border-radius: 999px; white-space: nowrap; cursor: pointer;
+}
+.btn:active { background: var(--accent-dim); }
+.btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--paper); padding: 9px 16px; font-size: 0.78rem; }
+.btn.ghost:active { background: var(--panel); }
+
+.howto { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.howto-icon { font-size: 1.3rem; flex-shrink: 0; }
+.howto p { margin: 0; font-size: 0.76rem; line-height: 1.5; color: var(--muted); }
+.howto strong { color: var(--paper); font-weight: 500; }
+
+.about { border-top: 1px solid var(--line); padding-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.about h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--paper); }
+.about dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; font-size: 0.8rem; line-height: 1.6; }
+.about dt { font-family: var(--font-mono); font-weight: 700; color: var(--accent); white-space: nowrap; }
+.about dd { margin: 0; color: var(--muted); }
+
+footer { text-align: center; font-size: 0.68rem; color: var(--muted-dim); }
+
+/* narrow phones: the side padding is worth more as board */
+@media (max-width: 360px) {
+  .page { padding-left: 14px; padding-right: 14px; }
+  .score-box { min-width: 44px; padding: 6px 7px; }
+  .scores { gap: 4px; }
+}

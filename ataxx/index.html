@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ふえる石</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ふえる石">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>ふえる石</h1>
+        <p class="tagline">となりに増やすか、跳んで動くか。</p>
+      </div>
+      <div class="scores">
+        <div class="score-box you">
+          <span class="score-label">あなた</span>
+          <span class="score-value" id="score-you">2</span>
+        </div>
+        <div class="score-box foe">
+          <span class="score-label">あいて</span>
+          <span class="score-value" id="score-foe">2</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">せんせき</span>
+          <span class="score-value" id="record">0-0</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="turn" id="turn">あなたの番</div>
+
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+      <div class="overlay" id="overlay" hidden>
+        <div class="overlay-message" id="overlay-message"></div>
+        <div class="overlay-sub" id="overlay-sub"></div>
+        <button class="btn" id="overlay-btn">もういちど</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="levels" id="levels">
+        <button class="level-btn" data-level="easy">よわい</button>
+        <button class="level-btn" data-level="normal">ふつう</button>
+        <button class="level-btn" data-level="hard">つよい</button>
+      </div>
+      <div class="levels" id="firsts">
+        <button class="level-btn" data-first="you">自分が先</button>
+        <button class="level-btn" data-first="foe">あいてが先</button>
+      </div>
+      <button class="btn ghost" id="new-btn">新しい盤</button>
+    </div>
+
+    <div class="howto">
+      <span class="howto-icon" aria-hidden="true">🪨</span>
+      <p><strong>自分の石をタップして、行き先をタップ。</strong>となりのマスなら石が増え、2マス先なら跳んで移動します。着地したところのまわりにある相手の石は、ぜんぶ自分のものになります。</p>
+    </div>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>ふやす</dt>
+        <dd>自分の石のとなり（ななめも含む8方向）の空きマスに置くと、石はその場に残ったまま1つ増えます。</dd>
+        <dt>とぶ</dt>
+        <dd>2マス先の空きマスに置くと、元の石は消えて移動になります。増えませんが、遠くへ陣地を伸ばせます。</dd>
+        <dt>うばう</dt>
+        <dd>置いたマスのまわり8マスにある相手の石は、すべて自分の色に変わります。一手で盤面がひっくり返ることもあります。</dd>
+        <dt>おわり</dt>
+        <dd>盤が埋まるか、両方とも打てなくなったら終了。石の多い方の勝ちです。打てる手がないときは自動的にパスになります。</dd>
+        <dt>先攻</dt>
+        <dd>どちらが先に打つかを選べます。はじめは自分が先攻です。切り替えるとその場で新しい盤になります。</dd>
+        <dt>かべ</dt>
+        <dd>灰色のマスは置けない壁です。毎回ランダムですが、必ず点対称に置かれるので有利不利は出ません。</dd>
+      </dl>
+    </section>
+
+    <footer>盤と壁の配置は毎回ランダム。あいての強さと先攻・後攻が選べます。</footer>
+  </div>
+
+  <script src="js/rules.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("../sw.js"));
+    }
+  </script>
+</body>
+</html>
