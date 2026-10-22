@@ -54,6 +54,10 @@
         <button class="level-btn" data-level="normal">ふつう</button>
         <button class="level-btn" data-level="hard">つよい</button>
       </div>
+      <div class="levels" id="firsts">
+        <button class="level-btn" data-first="you">自分が先</button>
+        <button class="level-btn" data-first="foe">あいてが先</button>
+      </div>
       <button class="btn ghost" id="new-btn">新しい盤</button>
     </div>
 
@@ -73,12 +77,14 @@
         <dd>置いたマスのまわり8マスにある相手の石は、すべて自分の色に変わります。一手で盤面がひっくり返ることもあります。</dd>
         <dt>おわり</dt>
         <dd>盤が埋まるか、両方とも打てなくなったら終了。石の多い方の勝ちです。打てる手がないときは自動的にパスになります。</dd>
+        <dt>先攻</dt>
+        <dd>どちらが先に打つかを選べます。はじめは自分が先攻です。切り替えるとその場で新しい盤になります。</dd>
         <dt>かべ</dt>
         <dd>灰色のマスは置けない壁です。毎回ランダムですが、必ず点対称に置かれるので有利不利は出ません。</dd>
       </dl>
     </section>
 
-    <footer>盤と壁の配置は毎回ランダム。あいての強さは3段階から選べます。</footer>
+    <footer>盤と壁の配置は毎回ランダム。あいての強さと先攻・後攻が選べます。</footer>
   </div>
 
   <script src="js/rules.js"></script>

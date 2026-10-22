@@ -127,6 +127,65 @@ with sync_playwright() as pw:
         print(f"      {len(sides)} moves watched while tapping ahead")
         page.evaluate("() => { window.__trace = []; }")
 
+        # who opens
+        check("a fresh install has you opening",
+              page.evaluate("() => window.__ataxx().first") == YOU
+              and page.inner_text("#firsts .level-btn.on").strip() == "自分が先",
+              page.inner_text("#firsts .level-btn.on"))
+
+        page.click('.level-btn[data-first="foe"]')
+        page.wait_for_timeout(2000)
+        swapped = page.evaluate("() => window.__ataxx()")
+        check("handing the opening to the opponent lets it move first",
+              swapped["first"] == FOE and swapped["counts"]["foe"] == 3
+              and swapped["counts"]["you"] == 2,
+              str(swapped["counts"]))
+        check("and the turn comes back to you",
+              swapped["turn"] == YOU and not swapped["busy"], f"turn={swapped['turn']}")
+
+        page.reload()
+        page.wait_for_timeout(1600)
+        check("the choice is remembered",
+              page.evaluate("() => window.__ataxx().first") == FOE
+              and page.inner_text("#firsts .level-btn.on").strip() == "あいてが先")
+
+        # the turn order has to hold with the opponent opening, too
+        page.evaluate("""() => {
+          window.__trace = [];
+          const snap = () => {
+            const s = window.__ataxx();
+            const key = s.cells.join("");
+            const last = window.__trace[window.__trace.length - 1];
+            if (!last || last.key !== key) window.__trace.push({key, cells: s.cells});
+            requestAnimationFrame(snap);
+          };
+          snap();
+        }""")
+        for _ in range(6):
+            s = page.evaluate("() => window.__ataxx()")
+            if s["over"]:
+                break
+            if s["turn"] == YOU and not s["busy"] and s["yourMoves"]:
+                m = s["yourMoves"][0]
+                tap(page, m["from"])
+                tap(page, m["to"])
+            page.wait_for_timeout(900)
+        trace = page.evaluate("() => window.__trace.map(t => t.cells)")
+        order = [explain(trace[i - 1], trace[i]) for i in range(1, len(trace))]
+        sides = [o[0] for o in order if o]
+        check("with the opponent opening, play still alternates",
+              all(o is not None for o in order)
+              and all(sides[i] != sides[i - 1] for i in range(1, len(sides))),
+              " ".join("you" if x == YOU else "foe" for x in sides))
+
+        page.click('.level-btn[data-first="you"]')
+        page.wait_for_timeout(600)
+        check("switching back starts a board where you open",
+              page.evaluate("() => window.__ataxx().first") == YOU
+              and page.evaluate("() => window.__ataxx().counts") == {"you": 2, "foe": 2, "empty": 45}
+              or page.evaluate("() => window.__ataxx().counts.you") == 2,
+              str(page.evaluate("() => window.__ataxx().counts")))
+
         page.click('.level-btn[data-level="hard"]')
         page.wait_for_timeout(600)
         check("choosing a level starts a fresh board on that level",

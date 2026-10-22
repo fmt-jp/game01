@@ -1,6 +1,7 @@
 (() => {
   const STORAGE_LEVEL = "ataxx-level";
   const STORAGE_RECORD = "ataxx-record";
+  const STORAGE_FIRST = "ataxx-first";
   const { YOU, FOE, EMPTY, WALL, SIZE, CELLS } = Ataxx;
 
   const boardEl = document.getElementById("board");
@@ -14,11 +15,14 @@
   const overlayBtn = document.getElementById("overlay-btn");
   const newBtn = document.getElementById("new-btn");
   const levelsEl = document.getElementById("levels");
+  const firstsEl = document.getElementById("firsts");
 
   let level = "normal";
+  let first = YOU;                 // who opens; you, unless it has been changed
   let record = { win: 0, loss: 0, draw: 0 };
   try {
     level = localStorage.getItem(STORAGE_LEVEL) || "normal";
+    first = localStorage.getItem(STORAGE_FIRST) === "foe" ? FOE : YOU;
     record = JSON.parse(localStorage.getItem(STORAGE_RECORD) || "null") || record;
   } catch (e) {}
   if (!AtaxxAI.LEVELS[level]) level = "normal";
@@ -190,7 +194,7 @@
     if (timer) { clearTimeout(timer); timer = null; }
     cells = Ataxx.newBoard();
     picked = -1;
-    turn = YOU;
+    turn = first;
     over = false;
     busy = false;
     overlayEl.hidden = true;
@@ -210,13 +214,26 @@
     btn.classList.toggle("on", btn.dataset.level === level);
   }
 
+  for (const btn of firstsEl.querySelectorAll(".level-btn")) {
+    btn.addEventListener("click", () => {
+      first = btn.dataset.first === "foe" ? FOE : YOU;
+      try { localStorage.setItem(STORAGE_FIRST, first === FOE ? "foe" : "you"); } catch (e) {}
+      for (const b of firstsEl.querySelectorAll(".level-btn")) {
+        b.classList.toggle("on", (b.dataset.first === "foe" ? FOE : YOU) === first);
+      }
+      newGame();
+    });
+    btn.classList.toggle("on", (btn.dataset.first === "foe" ? FOE : YOU) === first);
+  }
+
   newBtn.addEventListener("click", newGame);
   overlayBtn.addEventListener("click", newGame);
   window.addEventListener("resize", () => { if (cells) buildBoard(); });
 
   // Read-only snapshot, and a way to play a square, for the automated checks.
   window.__ataxx = () => ({
-    cells: Array.from(cells), turn, over, busy, level, record: { ...record },
+    cells: Array.from(cells), turn, over, busy, level, first,
+    record: { ...record },
     counts: Ataxx.counts(cells),
     yourMoves: Ataxx.legalMoves(cells, YOU).map((m) => ({ ...m })),
     picked,
