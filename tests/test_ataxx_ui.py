@@ -7,7 +7,7 @@ import sys
 
 from playwright.sync_api import sync_playwright
 from _common import CHROMIUM, SHOTS
-from ataxx_rules import CELLS, FOE, YOU, explain
+from ataxx_rules import CELLS, EMPTY, FOE, SIZE, WALL, YOU, explain, legal_moves
 
 BASE = "http://localhost:8390"
 failures = []
@@ -126,6 +126,68 @@ with sync_playwright() as pw:
               doubles == 0, f"{doubles} double moves in {len(sides)}")
         print(f"      {len(sides)} moves watched while tapping ahead")
         page.evaluate("() => { window.__trace = []; }")
+
+        # The board has to say what just happened. Without it a jump reads as a
+        # stone teleporting, and a run of moves after a pass reads as one.
+        s = page.evaluate("() => window.__ataxx()")
+        if not s["over"] and s["turn"] == YOU and s["yourMoves"]:
+            jump = next((m for m in s["yourMoves"] if not m["clone"]), s["yourMoves"][0])
+            tap(page, jump["from"])
+            tap(page, jump["to"])
+            page.wait_for_timeout(2600)
+            st = page.evaluate("() => window.__ataxx()")
+            marks = page.evaluate("""() => ({
+              from: [...document.querySelectorAll('.moved-from')].map(n => Number(n.dataset.index)),
+              to: [...document.querySelectorAll('.moved-to')].map(n => Number(n.dataset.index)),
+            })""")
+            last = st["lastMove"]
+            check("the square the last move landed on is marked",
+                  marks["to"] == [last["to"]], f"{marks} for {last}")
+            check("a jump also marks where it came from, a clone does not",
+                  marks["from"] == ([] if last["clone"] else [last["from"]]),
+                  f"{marks} for {last}")
+
+        # A position you cannot move in: the page has to say so rather than
+        # letting the opponent appear to make several moves at once.
+        boxed = [EMPTY] * CELLS
+        boxed[0] = YOU
+        for r, c in ((0, 1), (1, 0), (1, 1), (0, 2), (2, 0), (2, 2), (1, 2), (2, 1)):
+            boxed[r * SIZE + c] = WALL
+        boxed[5 * SIZE + 5] = FOE
+        boxed[6 * SIZE + 6] = FOE
+        assert not legal_moves(boxed, YOU) and legal_moves(boxed, FOE)
+        page.evaluate("([c, t]) => window.__setBoard(c, t)", [boxed, YOU])
+        page.wait_for_timeout(400)
+        check("being unable to move is announced in plain words",
+              "打てる手がありません" in page.inner_text("#turn")
+              and "notice" in (page.get_attribute("#turn", "class") or ""),
+              repr(page.inner_text("#turn")))
+        before = page.evaluate("() => window.__ataxx().counts")
+        page.evaluate("""() => {
+          window.__trace = [];
+          const snap = () => {
+            const s = window.__ataxx();
+            const key = s.cells.join("");
+            const last = window.__trace[window.__trace.length - 1];
+            if (!last || last.key !== key) window.__trace.push({key, cells: s.cells});
+            requestAnimationFrame(snap);
+          };
+          snap();
+        }""")
+        page.wait_for_timeout(4200)
+        after = page.evaluate("() => window.__ataxx()")
+        check("the opponent carries on while you are stuck",
+              after["counts"]["foe"] > before["foe"] and after["counts"]["you"] == before["you"],
+              f"{before} -> {after['counts']}")
+        stuck_trace = page.evaluate("() => window.__trace.map(t => t.cells)")
+        moves = [explain(stuck_trace[i - 1], stuck_trace[i]) for i in range(1, len(stuck_trace))]
+        check("and each of those is one legal move by the opponent, not a leap",
+              len(moves) >= 2 and all(m is not None and m[0] == FOE for m in moves),
+              f"{len(moves)} changes: " + str([None if m is None else m[0] for m in moves]))
+        page.evaluate("() => { window.__trace = []; }")
+
+        page.click("#new-btn")
+        page.wait_for_timeout(600)
 
         # who opens
         check("a fresh install has you opening",

@@ -53,11 +53,17 @@ body {
 .score-box.foe .score-value { color: var(--foe); }
 
 .turn {
+  align-self: center;
   text-align: center; font-family: var(--font-display); font-weight: 700; font-size: 0.92rem;
   color: var(--muted); min-height: 1.4rem;
 }
 .turn.you { color: var(--accent); }
 .turn.foe { color: var(--foe); }
+.turn.notice {
+  color: var(--gold); font-size: 0.86rem;
+  background: rgba(255, 207, 107, 0.12); border-radius: 999px; padding: 3px 12px;
+  align-self: center;
+}
 
 .board-wrap { position: relative; display: flex; justify-content: center; }
 
@@ -89,6 +95,11 @@ body {
   70% { transform: scale(1.12); }
   100% { transform: scale(1); opacity: 1; }
 }
+
+/* where the last move came from, and where it landed */
+.square.moved-from { box-shadow: inset 0 0 0 2px rgba(238, 246, 230, 0.35); }
+.square.moved-to.by-foe { box-shadow: inset 0 0 0 2px var(--foe); }
+.square.moved-to.by-you { box-shadow: inset 0 0 0 2px var(--accent); }
 
 .square.picked { background: rgba(163, 230, 53, 0.3); }
 .square.picked .stone { box-shadow: 0 0 0 3px var(--accent); }
@@ -138,6 +149,15 @@ body {
 .about dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; font-size: 0.8rem; line-height: 1.6; }
 .about dt { font-family: var(--font-mono); font-weight: 700; color: var(--accent); white-space: nowrap; }
 .about dd { margin: 0; color: var(--muted); }
+
+.reach { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+.reach svg { width: 86px; height: 86px; flex-shrink: 0; }
+.reach-key { display: flex; flex-direction: column; gap: 5px; font-size: 0.7rem; color: var(--muted); }
+.reach-key span { display: flex; align-items: center; gap: 7px; }
+.reach-key i { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; }
+.reach-key i.dot { background: var(--accent); }
+.reach-key i.near { background: var(--accent); transform: scale(0.45); }
+.reach-key i.far { border: 1.5px dashed var(--accent); }
 
 footer { text-align: center; font-size: 0.68rem; color: var(--muted-dim); }
 
