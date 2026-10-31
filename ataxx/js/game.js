@@ -34,6 +34,7 @@
   let busy = false;
   let over = false;
   let timer = null;
+  let lastMove = null;        // the move just played, marked on the board
 
   // The game advances through exactly one pending step. Scheduling a new one
   // cancels whatever was waiting, so a stray tap cannot leave two chains of
@@ -71,7 +72,14 @@
   function paint(animate) {
     for (let i = 0; i < CELLS; i++) {
       const node = squares[i];
-      node.className = "square" + (cells[i] === WALL ? " wall" : "");
+      let classes = "square" + (cells[i] === WALL ? " wall" : "");
+      // Leave the last move on the board. Without it a jump looks like a stone
+      // teleporting, and a run of moves after a pass looks like one huge one.
+      if (lastMove) {
+        if (i === lastMove.from && !lastMove.clone) classes += " moved-from";
+        if (i === lastMove.to) classes += " moved-to " + (lastMove.side === YOU ? "by-you" : "by-foe");
+      }
+      node.className = classes;
       const value = cells[i];
       if (value === YOU || value === FOE) {
         let stone = node.firstChild;
@@ -115,7 +123,7 @@
 
   function announce(text) {
     turnEl.textContent = text;
-    turnEl.className = "turn";
+    turnEl.className = "turn notice";
   }
 
   function finish() {
@@ -138,10 +146,12 @@
   function advance() {
     if (Ataxx.isOver(cells)) { busy = false; finish(); return; }
     if (Ataxx.legalMoves(cells, turn).length === 0) {
-      announce(turn === YOU ? "打てる手がないのでパス" : "あいてはパス");
+      announce(turn === YOU
+        ? "打てる手がありません。あいてが続けて打ちます"
+        : "あいては打てないのでパス。もう一度どうぞ");
       turn = turn === YOU ? FOE : YOU;
       busy = true;
-      later(() => { if (!over) advance(); }, 800);
+      later(() => { if (!over) advance(); }, 1400);
       return;
     }
     if (turn === FOE) {
@@ -161,6 +171,7 @@
     // Shut the board immediately. Waiting until advance() runs left a window in
     // which a second tap played another move, and the turn order came apart.
     busy = true;
+    lastMove = { from: move.from, to: move.to, clone: move.clone, side };
     paint({ placed: move.to, flipped: result.flipped });
     turn = side === YOU ? FOE : YOU;
     later(() => { if (!over) advance(); }, 320);
@@ -193,6 +204,7 @@
   function newGame() {
     if (timer) { clearTimeout(timer); timer = null; }
     cells = Ataxx.newBoard();
+    lastMove = null;
     picked = -1;
     turn = first;
     over = false;
@@ -233,6 +245,7 @@
   // Read-only snapshot, and a way to play a square, for the automated checks.
   window.__ataxx = () => ({
     cells: Array.from(cells), turn, over, busy, level, first,
+    lastMove: lastMove && { ...lastMove },
     record: { ...record },
     counts: Ataxx.counts(cells),
     yourMoves: Ataxx.legalMoves(cells, YOU).map((m) => ({ ...m })),
@@ -240,6 +253,20 @@
   });
   window.__tap = (i) => {
     squares[i].dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  };
+  // Lets a check set up a position that is otherwise hard to reach by playing,
+  // such as one where a side has nowhere to go and has to pass.
+  window.__setBoard = (next, whose) => {
+    if (timer) { clearTimeout(timer); timer = null; }
+    cells = Int8Array.from(next);
+    lastMove = null;
+    picked = -1;
+    over = false;
+    busy = false;
+    turn = whose;
+    overlayEl.hidden = true;
+    buildBoard();
+    advance();
   };
 
   newGame();
