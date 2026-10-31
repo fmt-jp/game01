@@ -8,7 +8,7 @@ its own directory and is self-contained.
 
 ## What is here
 
-Twelve games, all on `main` and live. Service worker at `pocket-arcade-v11`;
+Thirteen games, all on `main` and live. Service worker at `pocket-arcade-v12`;
 the whole site, every game included, works offline once visited.
 
 | Directory | Name | Kind | Worth knowing |
@@ -25,6 +25,7 @@ the whole site, every game included, works offline once visited.
 | `maze3d/` | きょだい迷路 | 3D first person | own raycaster, stamp rally, lookout tower |
 | `words/` | ことばの輪 | word puzzle | trace a kana wheel to fill a generated crossword |
 | `ataxx/` | ふえる石 | board game vs AI | clone or jump, converting what you land beside |
+| `rhythm/` | おとのつぶ | rhythm | song and chart both generated; WebAudio synthesis only |
 
 ## Ground rules
 
@@ -47,7 +48,8 @@ Shared across every game, so the collection reads as one thing:
 - Fonts: Zen Maru Gothic (display), Noto Sans JP (body), JetBrains Mono
   (numerals), all from Google Fonts.
 - A dark ground, with **one accent colour per game**. Taken so far: ember, gold,
-  teal, violet, blue, pink, green, crimson, amber, sky, timber, orchid, lime.
+  teal, violet, blue, pink, green, crimson, amber, sky, timber, orchid, lime,
+  indigo.
   A new game picks a new one and uses it for its own page and for its hub card.
 - The same page furniture in the same order: masthead with score boxes, a 遊び方
   one-liner, the board, the controls, then a 遊び方 section at the bottom.
@@ -112,7 +114,7 @@ check rather than a setup gap.
 Nothing here is a known bug — the games all work. These are the things a next
 session would most usefully pick up, roughly in that order.
 
-1. **Fifteen of the twenty-two checks cannot fail.** They print findings a person
+1. **Fourteen of the twenty-four checks cannot fail.** They print findings a person
    read at the time instead of asserting. `tests/README.md` names them. Until
    they are converted, a green `tests/run.sh` means "nothing crashed" for those
    games. Worth doing one game at a time.
@@ -128,13 +130,18 @@ session would most usefully pick up, roughly in that order.
    over a fence.
 4. **`barcode/`'s 図鑑 is read-only.** You cannot pick a monster from it to
    fight with; only the one just scanned can battle.
-5. **The hub is twelve cards long** and only grows. Sorting, grouping or a
+5. **The hub is thirteen cards long** and only grows. Sorting, grouping or a
    filter will be wanted before long.
 6. **`words/` draws its base words from a finite pool** — roughly 1,400 five and
    six kana words survive the variety rule — so the boards are generated but not
    literally endless. Building the wheel from a letter set rather than a single
    word would widen it, at the cost of the promise that one answer uses every
    letter.
+7. **`rhythm/`'s latency offset cannot be measured for the player.** The initial
+   value comes from `AudioContext.outputLatency`, which is wrong on plenty of
+   phones, and the ズレ調整 buttons leave it to the player to find by feel. A
+   calibration round — tap along to a bare metronome, take the median of the
+   errors — would set it properly.
 
 ## Pitfalls already hit here
 
@@ -157,3 +164,12 @@ session would most usefully pick up, roughly in that order.
   in during that gap, which started a second chain of scheduled turns and had
   the opponent moving twice in a row. Checks that only play politely, one move
   at a time, will not see it.
+- A look-ahead audio scheduler walks its event list in time order and stops at
+  the first event still in the future, so an unsorted list silences everything
+  after the first late entry. `rhythm/` built its backing track bar by bar and
+  queued one event in total until the list was sorted.
+- `AudioContext.currentTime` advances in blocks of 128 samples, about 3ms. A
+  sound asked for any sooner than that may already be in the past by the time
+  it is wired up, and anything in the past plays at once, as a click. Schedule
+  with a cushion (`rhythm/` uses 15ms) and clamp a late event forward rather
+  than scheduling it behind the clock.

@@ -34,6 +34,7 @@
     --timber: #d99a5b;
     --orchid: #e879f9;
     --lime: #a3e635;
+    --indigo: #818cf8;
 
     --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
     --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
@@ -122,6 +123,7 @@
   .game-card.timber::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--timber), transparent 70%); }
   .game-card.orchid::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--orchid), transparent 70%); }
   .game-card.lime::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--lime), transparent 70%); }
+  .game-card.indigo::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--indigo), transparent 70%); }
 
   .preview {
     flex-shrink: 0;
@@ -256,6 +258,13 @@
   }
   .preview.stones-icon svg { width: 80%; height: 80%; }
 
+  .preview.note-icon {
+    background: var(--ink-800);
+    align-items: center;
+    justify-items: center;
+  }
+  .preview.note-icon svg { width: 84%; height: 84%; }
+
   .game-info { flex: 1; min-width: 0; }
 
   .game-info h2 {
@@ -297,6 +306,7 @@
   .game-card.timber .play-arrow { color: var(--timber); }
   .game-card.orchid .play-arrow { color: var(--orchid); }
   .game-card.lime .play-arrow { color: var(--lime); }
+  .game-card.indigo .play-arrow { color: var(--indigo); }
 
   footer {
     text-align: center;
@@ -488,6 +498,25 @@
         <div class="game-info">
           <h2>ふえる石</h2>
           <p>となりに増やすか跳んで動くか。着地のまわりの相手の石を全部うばう対戦ゲーム。</p>
+        </div>
+        <div class="play-arrow">▶</div>
+      </a>
+      <a class="game-card indigo" href="rhythm/index.html">
+        <div class="preview note-icon">
+          <svg viewBox="0 0 24 24">
+            <g stroke="rgba(224, 228, 248, 0.10)" stroke-width="1">
+              <line x1="8" y1="2" x2="8" y2="22"/>
+              <line x1="16" y1="2" x2="16" y2="22"/>
+            </g>
+            <line x1="2" y1="17" x2="22" y2="17" stroke="#818cf8" stroke-width="1.4" stroke-opacity="0.9"/>
+            <circle cx="12" cy="17" r="3.1" fill="#818cf8"/>
+            <circle cx="4.6" cy="10" r="2.3" fill="#818cf8" fill-opacity="0.6"/>
+            <circle cx="19.4" cy="6" r="2" fill="#818cf8" fill-opacity="0.38"/>
+          </svg>
+        </div>
+        <div class="game-info">
+          <h2>おとのつぶ</h2>
+          <p>落ちてくる音を線の上でたたくリズムゲーム。曲も譜面も毎回その場で生まれます。</p>
         </div>
         <div class="play-arrow">▶</div>
       </a>

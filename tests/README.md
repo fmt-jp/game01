@@ -33,9 +33,14 @@ and `build_words.py` regenerates ことばの輪's word list (it needs `janome` 
 **These decide for themselves and exit non-zero when something is wrong**, so
 `run.sh` catches a regression in them:
 
+- `test_ataxx.py`
+- `test_ataxx_ui.py`
 - `test_barcode.py`
+- `test_hub.py`
 - `test_maze3d.py`
 - `test_maze_play.py`
+- `test_rhythm.py`
+- `test_rhythm_ui.py`
 - `test_words.py`
 - `test_words_ui.py`
 
@@ -48,7 +53,6 @@ catch a regression in them — read what they print:
 - `test_flow.py`
 - `test_flow_play.py`
 - `test_gems.py`
-- `test_hub.py`
 - `test_maze.py`
 - `test_maze3d_perspective.py`
 - `test_maze3d_ui.py`

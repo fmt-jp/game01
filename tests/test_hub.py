@@ -1,6 +1,6 @@
 """Hub + PWA check: every card reaches a working game, and the whole arcade
 still loads with the network switched off."""
-import re, pathlib
+import re, pathlib, sys
 from playwright.sync_api import sync_playwright
 from _common import CHROMIUM, SHOTS
 
@@ -33,12 +33,13 @@ with sync_playwright() as pw:
 
     cards = p.locator(".game-card")
     n = cards.count()
-    check("the hub lists 12 games", n == 12, f"found {n}")
+    check("the hub lists 13 games", n == 13, f"found {n}")
     hrefs = [cards.nth(i).get_attribute("href") for i in range(n)]
     check("めいろ探検 is on the hub", "maze/index.html" in hrefs, str(hrefs))
     check("きょだい迷路 is on the hub", "maze3d/index.html" in hrefs, str(hrefs))
     check("ことばの輪 is on the hub", "words/index.html" in hrefs, str(hrefs))
     check("ふえる石 is on the hub", "ataxx/index.html" in hrefs, str(hrefs))
+    check("おとのつぶ is on the hub", "rhythm/index.html" in hrefs, str(hrefs))
     titles = [cards.nth(i).locator("h2").inner_text() for i in range(n)]
     print("     ", " / ".join(titles))
     check("no horizontal overflow on the hub",
@@ -51,6 +52,8 @@ with sync_playwright() as pw:
           p.locator(".preview.wheel-icon svg").count() == 1)
     check("the board game card has its icon",
           p.locator(".preview.stones-icon svg").count() == 1)
+    check("the rhythm game card has its icon",
+          p.locator(".preview.note-icon svg").count() == 1)
     p.screenshot(path=f"{SHOTS}/hub.png", full_page=True)
 
     # each card opens a game that boots without errors
@@ -74,14 +77,14 @@ with sync_playwright() as pw:
       const c = await caches.open(keys[0]);
       return {keys, entries: (await c.keys()).length};
     }""")
-    check("the service worker cached the v11 shell",
-          version["keys"] == ["pocket-arcade-v11"] and version["entries"] >= len([s for s in shell if s]),
+    check("the service worker cached the v12 shell",
+          version["keys"] == ["pocket-arcade-v12"] and version["entries"] >= len([s for s in shell if s]),
           str(version))
 
     c.set_offline(True)
     p.goto(BASE + "/index.html")
     p.wait_for_timeout(600)
-    check("the hub loads offline", p.locator(".game-card").count() == 12)
+    check("the hub loads offline", p.locator(".game-card").count() == 13)
     p.goto(BASE + "/maze/index.html")
     p.wait_for_timeout(900)
     check("めいろ探検 loads offline",
@@ -139,9 +142,22 @@ with sync_playwright() as pw:
     check("and the opponent still answers offline",
           after["counts"]["foe"] > 2 or after["counts"]["you"] > 2,
           str(after["counts"]))
+    # and the rhythm game writes its own music, so it needs nothing from the network
+    p.goto(BASE + "/rhythm/index.html")
+    p.wait_for_timeout(900)
+    check("おとのつぶ loads offline",
+          p.evaluate("() => typeof window.__rhythm === 'function'"))
+    p.click("#overlay-btn")
+    p.wait_for_timeout(1200)
+    r = p.evaluate("() => window.__rhythm()")
+    check("and still generates a chart with the network down",
+          len(r["notes"]) > 20 and r["length"] > 20,
+          f'{len(r["notes"])} notes, {r["length"]:.0f}s')
+
     p.screenshot(path=f"{SHOTS}/maze_offline.png")
     c.set_offline(False)
     check("no page errors", not [e for e in errs if "ERR_" not in e], str(errs))
     b.close()
 
 print("\n" + ("ALL HUB CHECKS PASSED" if not fails else f"FAILURES: {fails}"))
+sys.exit(1 if fails else 0)
