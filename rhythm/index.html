@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>おとのつぶ</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="おとのつぶ">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>おとのつぶ</h1>
+        <p class="tagline">落ちてくる音を、線の上でたたく。</p>
+      </div>
+      <div class="scores">
+        <div class="score-box">
+          <span class="score-label">LEVEL</span>
+          <span class="score-value" id="level">1</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">コンボ</span>
+          <span class="score-value" id="combo">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">せいど</span>
+          <span class="score-value" id="accuracy">--%</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="stage-wrap">
+      <canvas id="stage"></canvas>
+      <div class="judge" id="judge"></div>
+      <div class="overlay" id="overlay">
+        <div class="overlay-message" id="overlay-message">おとのつぶ</div>
+        <div class="overlay-sub" id="overlay-sub">3本のレーンをタップ。音が出るので音量を上げてどうぞ。</div>
+        <button class="btn" id="overlay-btn">はじめる</button>
+      </div>
+    </div>
+
+    <div class="tuner">
+      <span class="tuner-label">ズレ調整</span>
+      <button class="tune-btn" id="offset-down" aria-label="早める">−</button>
+      <span class="tuner-value" id="offset-value">0ms</span>
+      <button class="tune-btn" id="offset-up" aria-label="遅らせる">＋</button>
+      <button class="btn ghost" id="offset-auto">じどう</button>
+    </div>
+
+    <div class="howto">
+      <span class="howto-icon" aria-hidden="true">🎵</span>
+      <p><strong>つぶが線に重なったときにタップ。</strong>うまくたたけた音だけがメロディになります。ズレを感じたら「ズレ調整」で合わせてください。</p>
+    </div>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>たたく</dt>
+        <dd>3本のレーンに落ちてくるつぶが、下の線に重なった瞬間にそのレーンをタップします。ぴったりなら「PERFECT」、少しずれても「GOOD」です。</dd>
+        <dt>メロディ</dt>
+        <dd>たたいた音がそのまま曲の旋律になります。ドラムとベースは自動で鳴りつづけるので、拍はそちらで取れます。</dd>
+        <dt>ズレ調整</dt>
+        <dd>端末によって音の出る速さが違います。早すぎる・遅すぎると感じたら数値を動かしてください。「じどう」は端末が申告している遅れを入れます。設定は保存されます。</dd>
+        <dt>レベル</dt>
+        <dd>せいど85%以上でクリア。レベルが上がるとテンポが速く、つぶの数が増えます。曲は毎回その場で作られます。</dd>
+      </dl>
+    </section>
+
+    <footer>曲も譜面も毎回自動生成。音源ファイルは使わず、すべてその場で合成しています。</footer>
+  </div>
+
+  <script src="js/song.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("../sw.js"));
+    }
+  </script>
+</body>
+</html>
