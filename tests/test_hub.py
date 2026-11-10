@@ -57,6 +57,68 @@ with sync_playwright() as pw:
           p.locator(".preview.note-icon svg").count() == 1)
     check("the tile game card has its icon",
           p.locator(".preview.pile-icon svg").count() == 1)
+
+    # --- the shelves ------------------------------------------------------
+    hub = p.evaluate("() => window.__hub()")
+    shelved = [g for shelf in hub["shelves"] for g in shelf["games"]]
+    check("the games are split over shelves, each one on exactly one shelf",
+          sorted(shelved) == sorted(hrefs) and len(shelved) == len(set(shelved)),
+          f"{len(shelved)} on shelves vs {len(hrefs)} cards")
+    check("there is a tab for every shelf",
+          len(hub["tabs"]) == len(hub["shelves"]) and hub["selected"] == 0,
+          str(hub))
+    print("      " + " / ".join(f"{t}: {len(sh['games'])}本"
+                                for t, sh in zip(hub["tabs"], hub["shelves"])))
+
+    # a tab takes you to its shelf, and the shelf says which tab you are on
+    for want in (2, 1, 0):
+        p.locator(".tab").nth(want).click()
+        p.wait_for_timeout(700)
+        got = p.evaluate("() => window.__hub()")
+        if got["tab"] != want or got["selected"] != want:
+            break
+    check("every tab brings its own shelf into view", got["tab"] == 0 and got["selected"] == 0,
+          f"asked for {want}, landed on {got['tab']} with tab {got['selected']} lit")
+
+    # and a swipe does the same thing the other way round
+    box = p.locator("#shelves").bounding_box()
+    p.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+    p.mouse.wheel(box["width"], 0)
+    p.wait_for_timeout(900)
+    swiped = p.evaluate("() => window.__hub()")
+    check("swiping sideways moves the lit tab with it",
+          swiped["tab"] == 1 and swiped["selected"] == 1, str(swiped))
+
+    p.reload()
+    p.wait_for_timeout(900)
+    check("and the shelf you were on is the one you come back to",
+          p.evaluate("() => window.__hub().tab") == 1,
+          str(p.evaluate("() => window.__hub()")))
+
+    p.locator(".tab").nth(1).press("ArrowRight")
+    p.wait_for_timeout(700)
+    check("the arrow keys walk the tabs", p.evaluate("() => window.__hub().tab") == 2,
+          str(p.evaluate("() => window.__hub().tab")))
+    p.locator(".tab").nth(0).click()
+    p.wait_for_timeout(700)
+
+    # the cards have to fit the page they are on, and say what they are
+    clipped = p.evaluate("() => [...document.querySelectorAll('.game-info p')]"
+                         ".filter((e) => e.scrollHeight > e.clientHeight + 1)"
+                         ".map((e) => e.textContent)")
+    check("no card's description is cut off", not clipped, str(clipped))
+    wide = p.evaluate("() => [...document.querySelectorAll('.game-card')]"
+                      ".map((c) => c.getBoundingClientRect())"
+                      ".filter((r) => r.width > window.innerWidth + 1).length")
+    check("no card is wider than the screen", wide == 0, str(wide))
+
+    # the tab row has to stay put, or a long shelf hides the way out
+    p.evaluate("() => window.scrollTo(0, 240)")
+    p.wait_for_timeout(300)
+    check("the tabs stay on screen as the shelf scrolls",
+          p.evaluate("() => document.querySelector('.tabs').getBoundingClientRect().top") >= -1)
+    p.evaluate("() => window.scrollTo(0, 0)")
+    p.wait_for_timeout(200)
     p.screenshot(path=f"{SHOTS}/hub.png", full_page=True)
 
     # each card opens a game that boots without errors
@@ -80,8 +142,8 @@ with sync_playwright() as pw:
       const c = await caches.open(keys[0]);
       return {keys, entries: (await c.keys()).length};
     }""")
-    check("the service worker cached the v13 shell",
-          version["keys"] == ["pocket-arcade-v13"] and version["entries"] >= len([s for s in shell if s]),
+    check("the service worker cached the v14 shell",
+          version["keys"] == ["pocket-arcade-v14"] and version["entries"] >= len([s for s in shell if s]),
           str(version))
 
     c.set_offline(True)

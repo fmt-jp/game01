@@ -8,7 +8,7 @@ its own directory and is self-contained.
 
 ## What is here
 
-Fourteen games, all on `main` and live. Service worker at `pocket-arcade-v13`;
+Fourteen games, all on `main` and live. Service worker at `pocket-arcade-v14`;
 the whole site, every game included, works offline once visited.
 
 | Directory | Name | Kind | Worth knowing |
@@ -56,6 +56,9 @@ Shared across every game, so the collection reads as one thing:
   differ by lightness, not by hue.
 - The same page furniture in the same order: masthead with score boxes, a 遊び方
   one-liner, the board, the controls, then a 遊び方 section at the bottom.
+- The hub is not one list: it is three shelves side by side, snapped, with a
+  sticky tab row. A card's description is clamped to two lines, so write one
+  that fits in about 25 characters rather than relying on the ellipsis.
 - Real-time games render to a canvas scaled by `devicePixelRatio`; grid games
   use CSS grid or DOM nodes.
 - Progress goes in `localStorage`, always wrapped in `try`/`catch` — it throws
@@ -68,7 +71,9 @@ Shared across every game, so the collection reads as one thing:
 3. Write the checks (see below) and get them passing.
 4. Publish a preview and get it approved before merging.
 5. Merge to `main`, then in the same pass:
-   - add a hub card to `index.html` (accent colour, preview icon, description),
+   - add a hub card to `index.html` (accent colour, preview icon, description)
+     **inside the right shelf** — the hub is three swipeable shelves,
+     そろえる / かんがえる / うごかす, with a tab each,
    - add every new file to `APP_SHELL` in `sw.js`,
    - **bump `CACHE_NAME` in `sw.js`**.
 6. Push `main`.
@@ -133,8 +138,11 @@ session would most usefully pick up, roughly in that order.
    over a fence.
 4. **`barcode/`'s 図鑑 is read-only.** You cannot pick a monster from it to
    fight with; only the one just scanned can battle.
-5. **The hub is fourteen cards long** and only grows. Sorting, grouping or a
-   filter will be wanted before long.
+5. **The shelves are hand-sorted.** Each game sits on そろえる, かんがえる or
+   うごかす because a person put it there, and a few are arguable (`gems/` is
+   real time but is shelved with the matching games, `ataxx/` is a board game
+   among the thinking ones). Past twenty games a shelf will want splitting,
+   and nothing stops a shelf growing past a screenful.
 6. **`words/` draws its base words from a finite pool** — roughly 1,400 five and
    six kana words survive the variety rule — so the boards are generated but not
    literally endless. Building the wheel from a letter set rather than a single

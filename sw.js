@@ -1,4 +1,4 @@
-const CACHE_NAME = "pocket-arcade-v13";
+const CACHE_NAME = "pocket-arcade-v14";
 
 const APP_SHELL = [
   "./",
