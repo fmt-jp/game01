@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>かさねとり</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="かさねとり">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>かさねとり</h1>
+        <p class="tagline">同じ牌をふたつ、積まれた山から。</p>
+      </div>
+      <div class="scores">
+        <div class="score-box">
+          <span class="score-label">LEVEL</span>
+          <span class="score-value" id="level">1</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">のこり</span>
+          <span class="score-value" id="left">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">とれる</span>
+          <span class="score-value" id="open">0</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="howto">
+      <span class="howto-icon" aria-hidden="true">🀄</span>
+      <p><strong>上にも横にも何も触れていない牌だけ取れます。</strong>同じ絵柄をふたつ選ぶと消えます。山は必ず最後まで取り切れる積み方で配られます。</p>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+      <div class="overlay" id="overlay" hidden>
+        <div class="overlay-message" id="overlay-message"></div>
+        <div class="overlay-sub" id="overlay-sub"></div>
+        <button class="btn" id="overlay-btn">次の山へ</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn ghost" id="hint-btn">ヒント <span id="hint-left">3</span></button>
+      <button class="btn ghost" id="undo-btn">もどす</button>
+      <button class="btn ghost" id="restack-btn">つみなおし</button>
+      <button class="btn ghost" id="new-btn">別の山</button>
+    </div>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>取る</dt>
+        <dd>同じ絵柄の牌を2枚タップすると消えます。全部消せばクリア。1枚目をもう一度タップすれば選び直せます。</dd>
+        <dt>取れる牌</dt>
+        <dd>上に牌が載っておらず、<strong>左か右のどちらかが空いている</strong>牌だけ動かせます。取れない牌は暗く沈んで見えます。</dd>
+        <dt>とれる</dt>
+        <dd>いま取れる組の数です。0 になったら「つみなおし」で、残った牌を同じ場所に配り直します。配り直した山も必ず取り切れます。</dd>
+        <dt>もどす</dt>
+        <dd>何手でも戻せます。詰んだと思ったら、まず戻してみてください。</dd>
+        <dt>絵柄</dt>
+        <dd>筒子・索子・萬子と字牌。はじめは同じ絵柄が2枚ずつで、相方は必ず1枚。レベルが上がると山が高くなり、<strong>同じ絵柄が4枚ある牌</strong>が増えます。相方が2枚あると取る順番を間違えやすく、ここが効いてきます。</dd>
+        <dt>記録</dt>
+        <dd>レベルごとのベストタイムが端末に残ります。</dd>
+      </dl>
+    </section>
+
+    <footer>山の形も絵柄の配りも毎回生成。配る前に必ず取り切れることを確かめています。</footer>
+  </div>
+
+  <script src="js/faces.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("../sw.js"));
+    }
+  </script>
+</body>
+</html>

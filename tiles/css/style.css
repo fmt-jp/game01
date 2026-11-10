@@ -1,0 +1,160 @@
+:root {
+  --ink-900: #0b1220;
+  --ink-800: #121c2c;
+  --panel: #18243a;
+  --paper: #eaf4ef;
+  --muted: #94ada0;
+  --muted-dim: #637a6f;
+  --accent: #2fd3a0;
+  --accent-dim: #1fa87e;
+  --gold: #ffcf6b;
+  --line: rgba(234, 244, 239, 0.10);
+
+  --tile-face: #fbf3e0;
+  --tile-edge: #c6b492;
+  --tile-dark: #a8956f;
+
+  --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+  --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; overscroll-behavior: none; }
+
+body {
+  background: var(--ink-900);
+  background-image:
+    radial-gradient(ellipse 620px 420px at 82% -8%, rgba(47, 211, 160, 0.13), transparent 60%),
+    radial-gradient(ellipse 520px 380px at 0% 14%, rgba(255, 207, 107, 0.07), transparent 55%);
+  color: var(--paper);
+  font-family: var(--font-body);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.page { width: 100%; max-width: 460px; padding: 22px 16px 40px; display: flex; flex-direction: column; gap: 13px; }
+
+.masthead { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+.masthead h1 {
+  margin: 0; font-family: var(--font-display); font-weight: 900;
+  font-size: clamp(1.3rem, 6vw, 1.7rem); line-height: 1.1; color: var(--paper); white-space: nowrap;
+}
+.tagline { margin: 6px 0 0; font-size: 0.76rem; color: var(--muted); max-width: 20ch; }
+
+.scores { display: flex; gap: 6px; flex-shrink: 0; }
+.score-box {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 6px 9px; display: flex; flex-direction: column; align-items: center; min-width: 48px;
+}
+.score-label { font-size: 0.54rem; font-weight: 700; color: var(--muted-dim); letter-spacing: 0.06em; }
+.score-value { font-family: var(--font-mono); font-weight: 700; font-size: 0.9rem; color: var(--paper); font-variant-numeric: tabular-nums; }
+#open { color: var(--accent); }
+#open.none { color: var(--gold); }
+
+.howto { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.howto-icon { font-size: 1.3rem; flex-shrink: 0; }
+.howto p { margin: 0; font-size: 0.74rem; line-height: 1.5; color: var(--muted); }
+.howto strong { color: var(--paper); font-weight: 500; }
+
+.board-wrap { position: relative; display: flex; justify-content: center; }
+
+/* The felt the pile sits on. Tiles are placed on it one by one, so the board
+   itself only needs to be the right size and to stop the page sliding about
+   under a finger -- and that belongs here, not on body, or the page cannot be
+   scrolled down to 遊び方. */
+.board {
+  position: relative;
+  touch-action: manipulation;
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 45%, rgba(47, 211, 160, 0.07), transparent 70%);
+}
+
+.tile {
+  position: absolute;
+  padding: 0; margin: 0; border: 0;
+  border-radius: 14%;
+  background: linear-gradient(170deg, #fffaf0 0%, var(--tile-face) 42%, #f0e6cf 100%);
+  box-shadow:
+    0 0 0 1px rgba(90, 76, 48, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset -2px -3px 0 var(--tile-edge),
+    0 3px 5px rgba(0, 0, 0, 0.45);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 160ms ease, box-shadow 140ms ease;
+}
+/* display on the class beats the browser's own [hidden] rule, so a tile
+   that has been taken needs this or it never leaves the pile. */
+.tile[hidden] { display: none; }
+.tile svg { width: 86%; height: 86%; display: block; }
+.tile text { font-family: var(--font-display); }
+
+/* A tile that cannot be taken sinks into the pile. The gap between this and a
+   free tile is the whole of the game's reading, so it is a large one. */
+.tile.locked {
+  filter: brightness(0.56) saturate(0.55) blur(0.2px);
+  cursor: default;
+}
+.tile.free:active { transform: translateY(1px); }
+
+.tile.picked {
+  box-shadow:
+    0 0 0 3px var(--accent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset -2px -3px 0 var(--tile-edge),
+    0 0 14px rgba(47, 211, 160, 0.6);
+  transform: translateY(-2px);
+}
+.tile.hinted { animation: nudge 900ms ease 2; }
+@keyframes nudge {
+  0%, 100% { transform: translateY(0); box-shadow: 0 0 0 1px rgba(90, 76, 48, 0.35), 0 3px 5px rgba(0, 0, 0, 0.45); }
+  50% { transform: translateY(-4px); box-shadow: 0 0 0 3px var(--gold), 0 0 16px rgba(255, 207, 107, 0.7); }
+}
+.tile.going { animation: lift 220ms ease forwards; pointer-events: none; }
+@keyframes lift {
+  to { transform: translateY(-10px) scale(0.86); opacity: 0; }
+}
+
+.overlay {
+  position: absolute; inset: -8px; background: rgba(11, 18, 32, 0.95); display: flex;
+  flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  text-align: center; padding: 18px; border-radius: 14px;
+}
+.overlay[hidden] { display: none; }
+.overlay-message { font-family: var(--font-display); font-size: 1.5rem; font-weight: 900; color: var(--gold); }
+.overlay-sub { font-family: var(--font-mono); font-size: 0.86rem; color: var(--muted); margin-bottom: 6px; line-height: 1.6; }
+
+.toolbar { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+
+.btn {
+  appearance: none; border: none; background: var(--accent); color: #06231a; font-family: var(--font-body);
+  font-weight: 700; font-size: 0.85rem; padding: 10px 20px; border-radius: 999px; white-space: nowrap; cursor: pointer;
+}
+.btn:active { background: var(--accent-dim); }
+.btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--paper); padding: 9px 14px; font-size: 0.76rem; }
+.btn.ghost:active { background: var(--panel); }
+.btn.ghost:disabled { color: var(--muted-dim); border-color: rgba(234, 244, 239, 0.05); cursor: default; }
+.btn.ghost.urge { border-color: var(--gold); color: var(--gold); }
+#hint-left { font-family: var(--font-mono); color: var(--muted); }
+
+.about { border-top: 1px solid var(--line); padding-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.about h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--paper); }
+.about dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; font-size: 0.8rem; line-height: 1.6; }
+.about dt { font-family: var(--font-mono); font-weight: 700; color: var(--accent); white-space: nowrap; }
+.about dd { margin: 0; color: var(--muted); }
+.about dd strong { color: var(--paper); font-weight: 500; }
+
+footer { text-align: center; font-size: 0.68rem; color: var(--muted-dim); }
+
+@media (max-width: 360px) {
+  .page { padding-left: 12px; padding-right: 12px; }
+  .score-box { min-width: 42px; padding: 6px 6px; }
+  .scores { gap: 4px; }
+  .btn.ghost { padding: 9px 11px; font-size: 0.72rem; }
+}
