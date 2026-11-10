@@ -33,13 +33,14 @@ with sync_playwright() as pw:
 
     cards = p.locator(".game-card")
     n = cards.count()
-    check("the hub lists 13 games", n == 13, f"found {n}")
+    check("the hub lists 14 games", n == 14, f"found {n}")
     hrefs = [cards.nth(i).get_attribute("href") for i in range(n)]
     check("めいろ探検 is on the hub", "maze/index.html" in hrefs, str(hrefs))
     check("きょだい迷路 is on the hub", "maze3d/index.html" in hrefs, str(hrefs))
     check("ことばの輪 is on the hub", "words/index.html" in hrefs, str(hrefs))
     check("ふえる石 is on the hub", "ataxx/index.html" in hrefs, str(hrefs))
     check("おとのつぶ is on the hub", "rhythm/index.html" in hrefs, str(hrefs))
+    check("かさねとり is on the hub", "tiles/index.html" in hrefs, str(hrefs))
     titles = [cards.nth(i).locator("h2").inner_text() for i in range(n)]
     print("     ", " / ".join(titles))
     check("no horizontal overflow on the hub",
@@ -54,6 +55,8 @@ with sync_playwright() as pw:
           p.locator(".preview.stones-icon svg").count() == 1)
     check("the rhythm game card has its icon",
           p.locator(".preview.note-icon svg").count() == 1)
+    check("the tile game card has its icon",
+          p.locator(".preview.pile-icon svg").count() == 1)
     p.screenshot(path=f"{SHOTS}/hub.png", full_page=True)
 
     # each card opens a game that boots without errors
@@ -77,14 +80,14 @@ with sync_playwright() as pw:
       const c = await caches.open(keys[0]);
       return {keys, entries: (await c.keys()).length};
     }""")
-    check("the service worker cached the v12 shell",
-          version["keys"] == ["pocket-arcade-v12"] and version["entries"] >= len([s for s in shell if s]),
+    check("the service worker cached the v13 shell",
+          version["keys"] == ["pocket-arcade-v13"] and version["entries"] >= len([s for s in shell if s]),
           str(version))
 
     c.set_offline(True)
     p.goto(BASE + "/index.html")
     p.wait_for_timeout(600)
-    check("the hub loads offline", p.locator(".game-card").count() == 13)
+    check("the hub loads offline", p.locator(".game-card").count() == 14)
     p.goto(BASE + "/maze/index.html")
     p.wait_for_timeout(900)
     check("めいろ探検 loads offline",
@@ -153,6 +156,16 @@ with sync_playwright() as pw:
     check("and still generates a chart with the network down",
           len(r["notes"]) > 20 and r["length"] > 20,
           f'{len(r["notes"])} notes, {r["length"]:.0f}s')
+
+    # and the tile pile is dealt on the spot too, so it needs no network either
+    p.goto(BASE + "/tiles/index.html")
+    p.wait_for_timeout(900)
+    check("かさねとり loads offline",
+          p.evaluate("() => typeof window.__tiles === 'function'"))
+    t = p.evaluate("() => window.__tiles()")
+    check("and still deals a pile that has something to take",
+          t["left"] > 10 and t["open"] > 0,
+          f'{t["left"]} tiles, {t["open"]} pairs')
 
     p.screenshot(path=f"{SHOTS}/maze_offline.png")
     c.set_offline(False)

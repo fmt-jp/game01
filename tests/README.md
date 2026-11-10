@@ -23,8 +23,8 @@ result from outside it — see the *Checking the work* section of `CLAUDE.md` fo
 why they are written that way.
 
 Some files are shared machinery rather than checks: `sokoban_solver.py`,
-`picross_solver.py` and `astar15.py` are the independent solvers the game checks
-compare against, `autopilot.js` steers きょだい迷路 through its own key handlers,
+`picross_solver.py`, `astar15.py` and `tiles_rules.py` are the independent
+solvers and rule books the game checks compare against, `autopilot.js` steers きょだい迷路 through its own key handlers,
 and `build_words.py` regenerates ことばの輪's word list (it needs `janome` and
 `wordfreq`, which the checks themselves do not).
 
@@ -41,6 +41,8 @@ and `build_words.py` regenerates ことばの輪's word list (it needs `janome` 
 - `test_maze_play.py`
 - `test_rhythm.py`
 - `test_rhythm_ui.py`
+- `test_tiles.py`
+- `test_tiles_ui.py`
 - `test_words.py`
 - `test_words_ui.py`
 

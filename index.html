@@ -35,6 +35,7 @@
     --orchid: #e879f9;
     --lime: #a3e635;
     --indigo: #818cf8;
+    --jade: #2fd3a0;
 
     --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
     --font-body: "Noto Sans JP", "Hiragino Sans", sans-serif;
@@ -124,6 +125,7 @@
   .game-card.orchid::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--orchid), transparent 70%); }
   .game-card.lime::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--lime), transparent 70%); }
   .game-card.indigo::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--indigo), transparent 70%); }
+  .game-card.jade::before { background: radial-gradient(ellipse 260px 180px at 100% 0%, var(--jade), transparent 70%); }
 
   .preview {
     flex-shrink: 0;
@@ -265,6 +267,13 @@
   }
   .preview.note-icon svg { width: 84%; height: 84%; }
 
+  .preview.pile-icon {
+    background: var(--ink-800);
+    align-items: center;
+    justify-items: center;
+  }
+  .preview.pile-icon svg { width: 84%; height: 84%; }
+
   .game-info { flex: 1; min-width: 0; }
 
   .game-info h2 {
@@ -307,6 +316,7 @@
   .game-card.orchid .play-arrow { color: var(--orchid); }
   .game-card.lime .play-arrow { color: var(--lime); }
   .game-card.indigo .play-arrow { color: var(--indigo); }
+  .game-card.jade .play-arrow { color: var(--jade); }
 
   footer {
     text-align: center;
@@ -517,6 +527,25 @@
         <div class="game-info">
           <h2>おとのつぶ</h2>
           <p>落ちてくる音を線の上でたたくリズムゲーム。曲も譜面も毎回その場で生まれます。</p>
+        </div>
+        <div class="play-arrow">▶</div>
+      </a>
+      <a class="game-card jade" href="tiles/index.html">
+        <div class="preview pile-icon">
+          <svg viewBox="0 0 24 24">
+            <g stroke="rgba(20, 28, 24, 0.45)" stroke-width="0.6">
+              <rect x="2.5" y="7" width="8" height="11" rx="1.6" fill="#cdbf9e"/>
+              <rect x="12" y="7" width="8" height="11" rx="1.6" fill="#cdbf9e"/>
+              <rect x="5.5" y="4" width="8" height="11" rx="1.6" fill="#fbf3e0"/>
+              <rect x="15" y="4" width="8" height="11" rx="1.6" fill="#fbf3e0"/>
+            </g>
+            <circle cx="9.5" cy="9.5" r="2.2" fill="#2fd3a0"/>
+            <circle cx="19" cy="9.5" r="2.2" fill="#2fd3a0"/>
+          </svg>
+        </div>
+        <div class="game-info">
+          <h2>かさねとり</h2>
+          <p>積まれた牌から同じ絵柄をふたつずつ。必ず取り切れる山だけが配られます。</p>
         </div>
         <div class="play-arrow">▶</div>
       </a>

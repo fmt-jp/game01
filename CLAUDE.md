@@ -8,7 +8,7 @@ its own directory and is self-contained.
 
 ## What is here
 
-Thirteen games, all on `main` and live. Service worker at `pocket-arcade-v12`;
+Fourteen games, all on `main` and live. Service worker at `pocket-arcade-v13`;
 the whole site, every game included, works offline once visited.
 
 | Directory | Name | Kind | Worth knowing |
@@ -26,6 +26,7 @@ the whole site, every game included, works offline once visited.
 | `words/` | ことばの輪 | word puzzle | trace a kana wheel to fill a generated crossword |
 | `ataxx/` | ふえる石 | board game vs AI | clone or jump, converting what you land beside |
 | `rhythm/` | おとのつぶ | rhythm | song and chart both generated; WebAudio synthesis only |
+| `tiles/` | かさねとり | mahjong solitaire | the pile is dealt by taking an empty one apart |
 
 ## Ground rules
 
@@ -49,8 +50,10 @@ Shared across every game, so the collection reads as one thing:
   (numerals), all from Google Fonts.
 - A dark ground, with **one accent colour per game**. Taken so far: ember, gold,
   teal, violet, blue, pink, green, crimson, amber, sky, timber, orchid, lime,
-  indigo.
+  indigo, jade.
   A new game picks a new one and uses it for its own page and for its hub card.
+  Fourteen in, the hues are close to used up: the next one will have to
+  differ by lightness, not by hue.
 - The same page furniture in the same order: masthead with score boxes, a 遊び方
   one-liner, the board, the controls, then a 遊び方 section at the bottom.
 - Real-time games render to a canvas scaled by `devicePixelRatio`; grid games
@@ -114,7 +117,7 @@ check rather than a setup gap.
 Nothing here is a known bug — the games all work. These are the things a next
 session would most usefully pick up, roughly in that order.
 
-1. **Fourteen of the twenty-four checks cannot fail.** They print findings a person
+1. **Fourteen of the twenty-six checks cannot fail.** They print findings a person
    read at the time instead of asserting. `tests/README.md` names them. Until
    they are converted, a green `tests/run.sh` means "nothing crashed" for those
    games. Worth doing one game at a time.
@@ -130,7 +133,7 @@ session would most usefully pick up, roughly in that order.
    over a fence.
 4. **`barcode/`'s 図鑑 is read-only.** You cannot pick a monster from it to
    fight with; only the one just scanned can battle.
-5. **The hub is thirteen cards long** and only grows. Sorting, grouping or a
+5. **The hub is fourteen cards long** and only grows. Sorting, grouping or a
    filter will be wanted before long.
 6. **`words/` draws its base words from a finite pool** — roughly 1,400 five and
    six kana words survive the variety rule — so the boards are generated but not
@@ -142,6 +145,11 @@ session would most usefully pick up, roughly in that order.
    phones, and the ズレ調整 buttons leave it to the player to find by feel. A
    calibration round — tap along to a bare metronome, take the median of the
    errors — would set it properly.
+8. **`tiles/` stacks on an aligned grid.** Real 上海 layouts offset tiles by
+   half a width, which is prettier and makes the free rule harder (a half-gap
+   is not enough to slide through). The pile is a mirrored height map instead,
+   which looks built but means every layout is a mound. Half-offsets would
+   want the free rule and the Python checker rewritten together.
 
 ## Pitfalls already hit here
 
@@ -173,3 +181,12 @@ session would most usefully pick up, roughly in that order.
   it is wired up, and anything in the past plays at once, as a click. Schedule
   with a cushion (`rhythm/` uses 15ms) and clamp a late event forward rather
   than scheduling it behind the clock.
+- A timer must not outlive the board it was set on. `tiles/` raised its
+  "cleared" overlay on a timer, so starting the next pile inside that moment
+  let the old timer land on the new pile and freeze it. Clearing a game's
+  pending timers where the game is set up is the fix; the ataxx entry above is
+  the same mistake wearing different clothes.
+- Measuring an element with a screenshot measures whatever is painted over it
+  too. A check that read the brightness of a buried tile was really reading
+  the tile standing on it, and reported a 17-point difference where the real
+  one was 97. Measure something nothing covers, or crop to the part that shows.

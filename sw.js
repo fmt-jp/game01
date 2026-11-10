@@ -1,4 +1,4 @@
-const CACHE_NAME = "pocket-arcade-v12";
+const CACHE_NAME = "pocket-arcade-v13";
 
 const APP_SHELL = [
   "./",
@@ -69,6 +69,12 @@ const APP_SHELL = [
   "./rhythm/js/song.js",
   "./rhythm/js/audio.js",
   "./rhythm/js/game.js",
+  "./tiles/",
+  "./tiles/index.html",
+  "./tiles/css/style.css",
+  "./tiles/js/faces.js",
+  "./tiles/js/board.js",
+  "./tiles/js/game.js",
 ];
 
 self.addEventListener("install", (event) => {
