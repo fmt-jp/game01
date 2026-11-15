@@ -8,7 +8,7 @@ its own directory and is self-contained.
 
 ## What is here
 
-Fifteen games, all on `main` and live. Service worker at `pocket-arcade-v16`;
+Fifteen games, all on `main` and live. Service worker at `pocket-arcade-v17`;
 the whole site, every game included, works offline once visited.
 
 | Directory | Name | Kind | Worth knowing |
