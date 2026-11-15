@@ -65,8 +65,7 @@ with sync_playwright() as pw:
     neighbour = next(i for i in range(16) if adjacent(i, blank))
     far = next(i for i in range(16) if i != blank and not adjacent(i, blank))
     value = now["tiles"][neighbour]
-    page.click(f'.tile[data-value="{value}"]' if page.locator(f'.tile[data-value="{value}"]').count()
-               else f'text="{value}"')
+    page.click(f'.tile[data-value="{value}"]')
     page.wait_for_timeout(150)
     after = state()
     check("tapping a tile beside the space slides it in",
@@ -77,8 +76,7 @@ with sync_playwright() as pw:
     far_value = after["tiles"][far]
     if far_value:
         before = state()
-        page.click(f'.tile[data-value="{far_value}"]' if page.locator(f'.tile[data-value="{far_value}"]').count()
-                   else f'text="{far_value}"')
+        page.click(f'.tile[data-value="{far_value}"]')
         page.wait_for_timeout(150)
         check("tapping one nowhere near it does nothing",
               state()["tiles"] == before["tiles"] and state()["moves"] == before["moves"])
@@ -98,12 +96,23 @@ with sync_playwright() as pw:
             note(f"attempt {attempt + 1}: no route found in time")
             continue
         note(f"{len(path)} moves found in {took:.1f}s")
-        for position in path:
-            value = state()["tiles"][position]
-            page.click(f'.tile[data-value="{value}"]' if page.locator(f'.tile[data-value="{value}"]').count()
-                       else f'text="{value}"')
-            page.wait_for_timeout(12)
-        page.wait_for_timeout(300)
+        # Wait for each tile to finish sliding before aiming at the next one.
+        # Clicking on a fixed rhythm drops a move now and then, and a dropped
+        # move leaves the puzzle one step short with nothing to say why.
+        missed = []
+        for n, position in enumerate(path):
+            was = state()
+            value = was["tiles"][position]
+            page.click(f'.tile[data-value="{value}"]')
+            for _ in range(20):
+                page.wait_for_timeout(15)
+                if state()["moves"] == was["moves"] + 1:
+                    break
+            else:
+                missed.append(f"move {n} ({value}) never took")
+                break
+        page.wait_for_timeout(250)
+        check("every tap in the route registered", not missed, "; ".join(missed))
         solved_it = state()
         break
 

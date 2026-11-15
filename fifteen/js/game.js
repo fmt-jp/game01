@@ -121,6 +121,7 @@
       const r = rowOf(p), c = colOf(p);
       const el = document.createElement("div");
       el.className = "tile";
+      el.dataset.value = String(value);
       el.textContent = String(value);
       el.style.width = `${cell}px`;
       el.style.height = `${cell}px`;
