@@ -16,7 +16,7 @@ import sys
 from collections import deque
 from itertools import permutations
 from playwright.sync_api import sync_playwright
-from _common import CHROMIUM
+from _common import CHROMIUM, BASE, check, note, head, finish
 
 N, E, S, W = 1, 2, 4, 8
 DIRS = (N, E, S, W)
@@ -304,7 +304,7 @@ with sync_playwright() as pw:
     page = browser.new_page()
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
-    page.goto("http://localhost:8390/maze/index.html")
+    page.goto(f"{BASE}/maze/index.html")
     page.wait_for_timeout(400)
     data = page.evaluate(GEN, [levels, per])
     timing = page.evaluate("""() => {
@@ -324,47 +324,77 @@ with sync_playwright() as pw:
       }
       return out;
     }""")
-    print("page errors:", [e for e in errors if "ERR_" not in e])
     browser.close()
 
-fails = 0
+head(f"[1] {len(data)} generated levels, taken apart one by one")
+check("no page errors while generating",
+      not [e for e in errors if "ERR_" not in e], str(errors))
+broken = []
 for i, lv in enumerate(data):
     problem = structure_problem(lv) or items_problem(lv)
     if problem:
-        fails += 1
-        print(f"  lv{lv['level']} #{i}: FAIL: {problem}")
-print(f"checked {len(data)} generated levels, failures: {fails}")
+        broken.append(f"lv{lv['level']} #{i}: {problem}")
+check("every maze is sound and every key, can and exit is reachable in turn",
+      not broken, "; ".join(broken[:3]))
 
 by_level = {}
 for lv in data:
     by_level.setdefault(lv["level"], []).append(lv)
 
-print("\nper level (generation):")
+head("[2] what each level is made of")
 for level, group in sorted(by_level.items()):
     opt = [g["optimal"] for g in group]
-    print(f"  lv{level} {group[0]['w']}x{group[0]['h']} keys={group[0]['wantKeys']} "
-          f"oil={group[0]['oilCount']} route min={min(opt)} avg={sum(opt)/len(opt):.0f} max={max(opt)} "
-          f"fuel={group[0]['startFuel']}(+{group[0]['oilValue']}/can)")
+    note(f"lv{level} {group[0]['w']}x{group[0]['h']} keys={group[0]['wantKeys']} "
+         f"oil={group[0]['oilCount']} route min={min(opt)} avg={sum(opt)/len(opt):.0f} max={max(opt)} "
+         f"fuel={group[0]['startFuel']}(+{group[0]['oilValue']}/can)")
 
-print("\nblind explorer (only sees what the lantern shows):")
-for label, use_oil in (("grabs oil", True), ("ignores oil", False)):
-    print(f"  strategy: {label}")
+head("[3] an explorer who can only see what the lantern shows")
+rates, slacks = {}, {}
+for label, use_oil in (("picks the oil up", True), ("walks past the oil", False)):
+    note(f"strategy: {label}")
     for level, group in sorted(by_level.items()):
         results = [play(g, use_oil=use_oil) for g in group]
         won = [r for r in results if r["won"]]
-        rate = len(won) / len(results) * 100
+        rates[(label, level)] = len(won) / len(results)
         extra = ""
         if won:
             slack = sum(r["slack"] for r in won) / len(won)
+            slacks[(label, level)] = slack
             walk = sum(r["steps"] for r in won) / len(won)
             optimal = sum(g["optimal"] for g in group) / len(group)
             extra = (f" avg {walk:.0f} steps vs {optimal:.0f} perfect, "
-                     f"fuel left {slack*100:.0f}%")
+                     f"fuel left {slack * 100:.0f}%")
         reasons = {}
         for r in results:
             if not r["won"]:
                 reasons[r.get("reason", "?")] = reasons.get(r.get("reason", "?"), 0) + 1
-        print(f"    lv{level}: cleared {len(won)}/{len(results)} ({rate:.0f}%){extra}"
-              + (f"  lost: {reasons}" if reasons else ""))
+        note(f"  lv{level}: cleared {len(won)}/{len(results)} "
+             f"({rates[(label, level)] * 100:.0f}%){extra}"
+             + (f"  lost: {reasons}" if reasons else ""))
 
-print("\ngeneration ms:", timing)
+with_oil = [v for (label, _), v in rates.items() if label == "picks the oil up"]
+without = [v for (label, _), v in rates.items() if label == "walks past the oil"]
+check("a blind explorer who takes the oil gets out most of the time, at every size",
+      min(with_oil) >= 0.6, f"worst level {min(with_oil) * 100:.0f}%")
+check("and one who walks past it does no better", sum(without) <= sum(with_oil),
+      f"{sum(with_oil) / len(with_oil) * 100:.0f}% with oil vs "
+      f"{sum(without) / len(without) * 100:.0f}% without")
+
+# Whether the lantern is a real constraint shows up far more steadily in how
+# much fuel is left at the exit than in how often fifteen runs happen to be
+# won: the cans are worth carrying, or they are decoration.
+took = [v for (label, _), v in slacks.items() if label == "picks the oil up"]
+skipped = [v for (label, _), v in slacks.items() if label == "walks past the oil"]
+check("the oil shows in the gauge: those who collect it arrive with far more left",
+      sum(took) / len(took) > sum(skipped) / len(skipped) + 0.1,
+      f"{sum(took) / len(took) * 100:.0f}% left with oil vs "
+      f"{sum(skipped) / len(skipped) * 100:.0f}% without")
+note(f"fuel at the exit: {sum(took) / len(took) * 100:.0f}% having collected oil, "
+     f"{sum(skipped) / len(skipped) * 100:.0f}% having ignored it")
+
+head("[4] how long a level takes to build")
+slow = [f"lv{k} takes {t['worst']}ms at worst" for k, t in timing.items() if t["worst"] > 50]
+check("a level is built quickly enough to feel instant", not slow, "; ".join(slow))
+note("worst of 30: " + ", ".join(f"{k} {t['worst']}ms" for k, t in timing.items()))
+
+finish("MAZE ITEM CHECKS")

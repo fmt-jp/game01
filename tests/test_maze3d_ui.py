@@ -1,5 +1,6 @@
 """Touch and layout checks: the thumb stick, the look drag, the hold buttons,
 and that the page still scrolls to the instructions on a small phone."""
+import sys
 from playwright.sync_api import sync_playwright
 from _common import CHROMIUM, SHOTS
 
@@ -100,3 +101,4 @@ with sync_playwright() as pw:
     b.close()
 
 print("\n" + ("ALL UI CHECKS PASSED" if not fails else f"FAILURES: {fails}"))
+sys.exit(1 if fails else 0)

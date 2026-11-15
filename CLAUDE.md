@@ -90,10 +90,11 @@ Under `tests/`. Run them with `tests/run.sh` (serves the site on :8390 and runs
 every check), or `tests/run.sh maze3d` for one game. Each check prints its own
 results and exits non-zero on failure.
 
-Most of these print their findings for a person to read rather than asserting;
-`tests/README.md` says which ones decide for themselves, and *Outstanding work*
-below treats fixing that as the first job. A new check should assert from the
-start.
+**Every check decides for itself** and exits non-zero when something is wrong,
+so a green `tests/run.sh` means what it says. `_common.py` holds the shared
+`check` / `note` / `head` / `finish` helpers a new check should use. Where a
+measurement is noisy, assert on the steadier figure behind it and print the
+noisy one: a check that fails one run in ten is worse than no check at all.
 
 The approach that has actually caught bugs here: **generate in the browser,
 verify from outside it.**
@@ -124,42 +125,38 @@ check rather than a setup gap.
 Nothing here is a known bug — the games all work. These are the things a next
 session would most usefully pick up, roughly in that order.
 
-1. **Fourteen of the twenty-eight checks cannot fail.** They print findings a person
-   read at the time instead of asserting. `tests/README.md` names them. Until
-   they are converted, a green `tests/run.sh` means "nothing crashed" for those
-   games. Worth doing one game at a time.
-2. **`barcode/` depends on a CDN.** It loads ZXing as a fallback for browsers
+1. **`barcode/` depends on a CDN.** It loads ZXing as a fallback for browsers
    without `BarcodeDetector` (notably iOS Safari), which is the only external
    dependency in the repository and means scanning does not work offline on
    those browsers. Vendoring the library would fix it; documenting it as a
    limitation is the cheaper alternative.
-3. **`maze3d/` has no floor texture**, so in open spaces there is little sense
+2. **`maze3d/` has no floor texture**, so in open spaces there is little sense
    of movement — the walls carry it alone. Floor casting at reduced resolution
    would work without costing the frame budget. Also, a tower is only visible in
    line of sight: the depth buffer is per column, so its roof cannot be seen
    over a fence.
-4. **`barcode/`'s 図鑑 is read-only.** You cannot pick a monster from it to
+3. **`barcode/`'s 図鑑 is read-only.** You cannot pick a monster from it to
    fight with; only the one just scanned can battle.
-5. **The shelves are hand-sorted.** Each game sits on そろえる, かんがえる or
+4. **The shelves are hand-sorted.** Each game sits on そろえる, かんがえる or
    うごかす because a person put it there, and a few are arguable (`gems/` is
    real time but is shelved with the matching games, `ataxx/` is a board game
    among the thinking ones). Past twenty games a shelf will want splitting,
    and nothing stops a shelf growing past a screenful.
-6. **`words/` draws its base words from a finite pool** — roughly 1,400 five and
+5. **`words/` draws its base words from a finite pool** — roughly 1,400 five and
    six kana words survive the variety rule — so the boards are generated but not
    literally endless. Building the wheel from a letter set rather than a single
    word would widen it, at the cost of the promise that one answer uses every
    letter.
-7. **`rhythm/`'s latency offset cannot be measured for the player.** The initial
+6. **`rhythm/`'s latency offset cannot be measured for the player.** The initial
    value comes from `AudioContext.outputLatency`, which is wrong on plenty of
    phones, and the ズレ調整 buttons leave it to the player to find by feel. A
    calibration round — tap along to a bare metronome, take the median of the
    errors — would set it properly.
-8. **`bridges/` runs out of room at level 12.** The board caps at 7 by 9 with
+7. **`bridges/` runs out of room at level 12.** The board caps at 7 by 9 with
    24 islands, because a phone cannot show more and still leave an island big
    enough to tap, so the search depth stops climbing there. A harder board
    would have to come from the shape of the clues rather than the size.
-9. **`tiles/` stacks on an aligned grid.** Real 上海 layouts offset tiles by
+8. **`tiles/` stacks on an aligned grid.** Real 上海 layouts offset tiles by
    half a width, which is prettier and makes the free rule harder (a half-gap
    is not enough to slide through). The pile is a mirrored height map instead,
    which looks built but means every layout is a mound. Half-offsets would
@@ -208,3 +205,8 @@ session would most usefully pick up, roughly in that order.
   rightwards from the rightmost island in `bridges/` ran off down the number
   line and hung the page, with nothing in the console to say why. Any walk
   outward from a cell wants both ends bounded.
+- Setting a game's state right after a call that may have ended the game wipes
+  the ending out. `gems/` ran `spawnPiece(); gameState = "falling";` in two
+  places, and spawnPiece is exactly where a full column is noticed, so the
+  board froze instead of finishing: nothing placeable, nothing scored, no
+  overlay to start again from. Set the state first, then call.

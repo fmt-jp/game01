@@ -30,42 +30,44 @@ and `build_words.py` regenerates ことばの輪's word list (it needs `janome` 
 
 ## Self-checking, versus printing for a person to read
 
-**These decide for themselves and exit non-zero when something is wrong**, so
-`run.sh` catches a regression in them:
+**Every check decides for itself and exits non-zero when something is wrong**, so
+`run.sh` catches a regression anywhere:
 
+- `test_2048.py`
 - `test_ataxx.py`
 - `test_ataxx_ui.py`
 - `test_barcode.py`
 - `test_bridges.py`
 - `test_bridges_ui.py`
+- `test_fifteen.py`
+- `test_flow.py`
+- `test_flow_play.py`
+- `test_gems.py`
 - `test_hub.py`
+- `test_maze.py`
 - `test_maze3d.py`
+- `test_maze3d_perspective.py`
+- `test_maze3d_ui.py`
+- `test_maze_items.py`
 - `test_maze_play.py`
+- `test_maze_ui.py`
+- `test_picross.py`
+- `test_pwa.py`
 - `test_rhythm.py`
 - `test_rhythm_ui.py`
+- `test_sokoban.py`
+- `test_stack.py`
 - `test_tiles.py`
 - `test_tiles_ui.py`
 - `test_words.py`
 - `test_words_ui.py`
 
-**These print their findings and always exit 0.** They were written to answer a
-question during development, and a person read the output. `run.sh` will not
-catch a regression in them — read what they print:
+Several of these began as scripts that printed what they saw for a person to
+read and always exited 0; they were converted one game at a time. The shared
+`check` / `note` / `head` / `finish` helpers in `_common.py` are what a new
+check should use.
 
-- `test_2048.py`
-- `test_fifteen.py`
-- `test_flow.py`
-- `test_flow_play.py`
-- `test_gems.py`
-- `test_maze.py`
-- `test_maze3d_perspective.py`
-- `test_maze3d_ui.py`
-- `test_maze_items.py`
-- `test_maze_ui.py`
-- `test_picross.py`
-- `test_pwa.py`
-- `test_sokoban.py`
-- `test_stack.py`
-
-Converting the second group into assertions is worth doing; until then, do not
-read a green `run.sh` as more than "nothing crashed" for those games.
+Where a check measures something noisy -- a clear rate over fifteen runs, say
+-- it asserts on the steadier figure behind it (fuel left at the exit rather
+than how often a run happened to be won) and prints the noisy one. A check
+that fails one run in ten is worse than no check at all.

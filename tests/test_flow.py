@@ -10,7 +10,7 @@ Two checks per puzzle:
 import json
 import sys
 from playwright.sync_api import sync_playwright
-from _common import CHROMIUM
+from _common import CHROMIUM, BASE, check, note, head, finish
 
 
 def neighbors(idx, size):
@@ -120,42 +120,53 @@ with sync_playwright() as pw:
     page = browser.new_page()
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
-    page.goto("http://localhost:8390/flow/index.html")
+    page.goto(f"{BASE}/flow/index.html")
     page.wait_for_timeout(400)
 
     count = int(sys.argv[1]) if len(sys.argv) > 1 else 40
     puzzles = page.evaluate(GEN_SCRIPT, [count])
-    print(f"generated {len(puzzles)} puzzles; page errors: {errors}")
+    head(f"[1] {count} puzzles, generated in the browser")
+    check("the generator produced every puzzle it was asked for",
+          len(puzzles) == count and all(p for p in puzzles),
+          f"{sum(1 for p in puzzles if p)} of {count}")
+    check("no page errors while generating", not errors, str(errors))
     browser.close()
 
-fails = 0
-nulls = 0
-solver_checked = 0
+broken, unsolved, out_of_budget, solver_checked = [], [], 0, 0
 for i, p in enumerate(puzzles):
     if p is None:
-        nulls += 1
-        print(f"  #{i}: GENERATOR RETURNED NULL")
+        broken.append(f"#{i}: the generator gave back nothing")
         continue
     problem = structural_check(p)
     if problem:
-        fails += 1
-        print(f"  #{i} ({p['size']}x{p['size']}): STRUCTURAL FAIL: {problem}")
+        broken.append(f"#{i} ({p['size']}x{p['size']}): {problem}")
         continue
     if p["size"] <= 6:
         try:
             ok = solve(p["size"], p["endpoints"])
         except TimeoutError:
-            print(f"  #{i} ({p['size']}x{p['size']}): solver budget exhausted (skipped)")
+            out_of_budget += 1
             continue
         solver_checked += 1
         if not ok:
-            fails += 1
-            print(f"  #{i} ({p['size']}x{p['size']}): SOLVER FOUND NO SOLUTION: {p['endpoints']}")
+            unsolved.append(f"#{i} ({p['size']}x{p['size']}): no way to fill it: {p['endpoints']}")
+
+head("[2] what the generator says it made")
+check("every puzzle's own answer fills the board, end to end, once each",
+      not broken, "; ".join(broken[:3]))
+
+head("[3] and what a solver makes of the clues alone")
+check(f"all {solver_checked} of the smaller boards can be solved from the dots",
+      not unsolved and solver_checked > 0,
+      "; ".join(unsolved[:3]) or f"only {solver_checked} were tried")
+if out_of_budget:
+    note(f"{out_of_budget} boards took more search than the budget allows; not counted either way")
 
 sizes = {}
 for p in puzzles:
     if p:
-        key = f"{p['size']}x{p['size']}/{len(p['endpoints'])}colors"
+        key = f"{p['size']}x{p['size']} with {len(p['endpoints'])} colours"
         sizes[key] = sizes.get(key, 0) + 1
-print("distribution:", sizes)
-print(f"structural+solver failures: {fails}, null generations: {nulls}, solver-verified: {solver_checked}")
+note("sizes: " + ", ".join(f"{k} x{v}" for k, v in sorted(sizes.items())))
+
+finish("FLOW CHECKS")

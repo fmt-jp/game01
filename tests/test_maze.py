@@ -9,14 +9,14 @@ Per maze:
 import sys
 from collections import deque
 from playwright.sync_api import sync_playwright
-from _common import CHROMIUM
+from _common import CHROMIUM, BASE, check as say, note, head, finish
 
 N, E, S, W = 1, 2, 4, 8
 DELTA = {N: (0, -1), E: (1, 0), S: (0, 1), W: (-1, 0)}
 OPP = {N: S, E: W, S: N, W: E}
 
 
-def check(maze):
+def faults(maze):
     w, h = maze["w"], maze["h"]
     cells = maze["cells"]
     total = w * h
@@ -82,7 +82,7 @@ with sync_playwright() as pw:
     page = browser.new_page()
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
-    page.goto("http://localhost:8390/maze/index.html")
+    page.goto(f"{BASE}/maze/index.html")
     page.wait_for_timeout(400)
     count = int(sys.argv[1]) if len(sys.argv) > 1 else 40
     mazes = page.evaluate(GEN, [count])
@@ -96,20 +96,34 @@ with sync_playwright() as pw:
       }
       return out;
     }""")
-    print("page errors:", errors)
     browser.close()
 
-fails = 0
-dists = {}
-for i, m in enumerate(mazes):
-    problem = check(m)
-    if problem:
-        fails += 1
-        print(f"  #{i} ({m['w']}x{m['h']}): FAIL: {problem}")
-    key = f"{m['w']}x{m['h']}"
-    dists.setdefault(key, []).append(m["goalDistance"])
+head(f"[1] {len(mazes)} mazes, each taken apart on its own")
+say("the generator produced every maze it was asked for",
+    len(mazes) == count and all(mazes), f"{sum(1 for m in mazes if m)} of {count}")
+say("no page errors while generating", not errors, str(errors))
 
-print(f"checked {len(mazes)} mazes, failures: {fails}")
-for k, v in sorted(dists.items()):
-    print(f"  {k}: goal distance min={min(v)} avg={sum(v)/len(v):.1f} max={max(v)}")
-print("generation ms:", timing)
+broken, dists = [], {}
+for i, m in enumerate(mazes):
+    problem = faults(m)
+    if problem:
+        broken.append(f"#{i} ({m['w']}x{m['h']}): {problem}")
+    dists.setdefault(f"{m['w']}x{m['h']}", []).append(m["goalDistance"])
+
+say("every maze is a proper one: no one-sided walls, no loops, no islands, "
+    "and the exit really is the farthest cell",
+    not broken, "; ".join(broken[:3]))
+
+# A maze whose exit is round the first corner is not worth walking.
+thin = [f"{k}: shortest route only {min(v)}" for k, v in dists.items()
+        if min(v) < int(k.split("x")[0]) * 2]
+say("and the way out is a long walk in every size", not thin, "; ".join(thin))
+for k, v in sorted(dists.items(), key=lambda kv: int(kv[0].split("x")[0])):
+    note(f"{k}: the exit is {min(v)}-{max(v)} steps off, {sum(v)/len(v):.0f} on average")
+
+head("[2] how long it takes to build one")
+slow = [f"{k} takes {t['worst']}ms at worst" for k, t in timing.items() if t["worst"] > 50]
+say("a maze is built quickly enough to feel instant", not slow, "; ".join(slow))
+note("worst of 40: " + ", ".join(f"{k} {t['worst']}ms" for k, t in timing.items()))
+
+finish("MAZE CHECKS")

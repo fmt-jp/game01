@@ -5,7 +5,7 @@ can regenerate the exact puzzle the game is showing (solution included) and
 trace it with real drags.
 """
 from playwright.sync_api import sync_playwright
-from _common import CHROMIUM, SHOTS
+from _common import CHROMIUM, SHOTS, BASE, check, note, head, finish
 
 SEED_SCRIPT = """
 (() => {
@@ -46,44 +46,77 @@ with sync_playwright() as pw:
     page.on("console", lambda m: errors.append(f"{m.type}:{m.text}") if m.type == "error" else None)
 
     page.add_init_script(SEED_SCRIPT)
-    page.goto("http://localhost:8390/flow/index.html")
+    page.goto(f"{BASE}/flow/index.html")
     page.wait_for_timeout(500)
 
-    print("initial status:", page.inner_text("#pairs-status"), page.inner_text("#fill-status"))
+    head("[1] the board it opens with")
+    pairs, fill = page.inner_text("#pairs-status"), page.inner_text("#fill-status")
+    check("nothing is joined up yet", pairs.startswith("0/"), pairs)
+    check("and nothing is filled in", fill.startswith("0/"), fill)
     page.screenshot(path=f"{SHOTS}/flow_start.png")
 
+    # The page's Math.random was replaced before it loaded, so asking for the
+    # same seed again rebuilds the very puzzle on screen, answer and all.
     puzzle = solve_board(page, 20260920, 5, 4)
-    print("puzzle endpoints:", puzzle["endpoints"])
+    check("the puzzle on screen can be rebuilt from its seed",
+          puzzle and len(puzzle["endpoints"]) == 4, str(puzzle and puzzle["endpoints"]))
 
     box = page.query_selector("#board").bounding_box()
     size = puzzle["size"]
 
-    # Trace every colour's path with real pointer drags.
-    for seg in puzzle["solution"]:
-        x, y = cell_xy(box, size, seg[0])
+    def trace(cells):
+        x, y = cell_xy(box, size, cells[0])
         page.mouse.move(x, y)
         page.mouse.down()
-        for cell in seg[1:]:
+        for cell in cells[1:]:
             x, y = cell_xy(box, size, cell)
             page.mouse.move(x, y)
         page.mouse.up()
         page.wait_for_timeout(40)
 
-    page.wait_for_timeout(200)
-    print("after solve:", page.inner_text("#pairs-status"), page.inner_text("#fill-status"))
-    overlay_hidden = page.get_attribute("#overlay", "hidden")
-    print("cleared overlay shown:", overlay_hidden is None)
-    if overlay_hidden is None:
-        print("message:", page.inner_text("#overlay-message"), "|", page.inner_text("#overlay-sub"))
-    print("cleared counter:", page.inner_text("#cleared"))
+    head("[2] a line that goes nowhere")
+    # Drag from one colour's dot into the middle and stop: the pair is not
+    # joined, and the status must not pretend otherwise.
+    stray = puzzle["solution"][0]
+    if len(stray) > 2:
+        trace(stray[:-1])
+        check("a line stopped short joins nothing",
+              page.inner_text("#pairs-status").startswith("0/"),
+              page.inner_text("#pairs-status"))
+        trace([stray[0]])          # tap the dot to clear that line again
+        page.wait_for_timeout(60)
+
+    head("[3] tracing every colour, with real drags")
+    for seg in puzzle["solution"]:
+        trace(seg)
+
+    page.wait_for_timeout(250)
+    pairs, fill = page.inner_text("#pairs-status"), page.inner_text("#fill-status")
+    joined, of = [int(n) for n in pairs.split("/")]
+    done, cells = [int(n) for n in fill.split("/")]
+    check("every pair is joined", joined == of == len(puzzle["endpoints"]), pairs)
+    check("and every square is used", done == cells == size * size, fill)
+    check("the game calls it finished",
+          page.get_attribute("#overlay", "hidden") is None
+          and page.inner_text("#overlay-message").strip() != "")
+    check("and counts a puzzle cleared", page.inner_text("#cleared").strip() == "1",
+          page.inner_text("#cleared"))
+    note(f'{page.inner_text("#overlay-message")} | {page.inner_text("#overlay-sub")}')
     page.screenshot(path=f"{SHOTS}/flow_cleared.png")
 
-    # advance to next puzzle
+    head("[4] on to the next one")
+    was = page.inner_text("#level")
     page.click("#overlay-btn")
-    page.wait_for_timeout(400)
-    print("level after next:", page.inner_text("#level"),
-          "status:", page.inner_text("#pairs-status"), page.inner_text("#fill-status"))
+    page.wait_for_timeout(500)
+    check("the level goes up", page.inner_text("#level") != was,
+          f'{was} -> {page.inner_text("#level")}')
+    check("and the new board starts empty",
+          page.inner_text("#pairs-status").startswith("0/")
+          and page.inner_text("#fill-status").startswith("0/"),
+          f'{page.inner_text("#pairs-status")} {page.inner_text("#fill-status")}')
     page.screenshot(path=f"{SHOTS}/flow_level2.png")
 
-    print("errors:", errors)
+    check("no page errors", not errors, str(errors))
     browser.close()
+
+finish("FLOW PLAY CHECKS")

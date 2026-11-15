@@ -1,4 +1,5 @@
 """Touch-level checks: swipe input, page scrolling, small-screen layout."""
+import sys
 from playwright.sync_api import sync_playwright
 from _common import CHROMIUM, SHOTS
 
@@ -70,3 +71,4 @@ with sync_playwright() as pw:
 
 bad = [l for l, c, _ in ok if not c]
 print("\n" + ("ALL UI CHECKS PASSED" if not bad else f"FAILURES: {bad}"))
+sys.exit(1 if bad else 0)
