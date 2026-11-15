@@ -323,5 +323,12 @@
     render();
   });
 
+  // Read-only snapshot for the automated checks.
+  window.__sokoban = () => ({
+    level: levelIndex, levels: LEVELS.length, text: LEVELS[levelIndex],
+    rows, cols, moves, won: isWon(),
+    walls: [...walls], goals: [...goals], boxes: [...boxes], player: { ...player },
+  });
+
   loadLevel(0);
 })();

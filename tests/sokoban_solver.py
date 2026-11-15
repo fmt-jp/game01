@@ -65,14 +65,17 @@ def render_check(level):
     if len(goals) != len(boxes):
         print("  !! goal/box count mismatch")
 
-levels = {}
-exec(open(sys.argv[1]).read(), levels)
+# Run it directly over a file of levels to look at them by hand; imported, it
+# is just the solver, so importing must not go looking for a command line.
+if __name__ == "__main__":
+    levels = {}
+    exec(open(sys.argv[1]).read(), levels)
 
-for name, lvl in levels["LEVELS"]:
-    print(f"=== {name} ===")
-    render_check(lvl)
-    sol, states, status = solve(lvl)
-    if status == "OK":
-        print(f"  SOLVED in {len(sol)} moves, explored {states} states")
-    else:
-        print(f"  FAILED: {status} (explored {states} states)")
+    for name, lvl in levels["LEVELS"]:
+        print(f"=== {name} ===")
+        render_check(lvl)
+        sol, states, status = solve(lvl)
+        if status == "OK":
+            print(f"  SOLVED in {len(sol)} moves, explored {states} states")
+        else:
+            print(f"  FAILED: {status} (explored {states} states)")

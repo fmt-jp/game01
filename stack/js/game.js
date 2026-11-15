@@ -303,6 +303,16 @@
     if (!wasPlaying) render();
   });
 
+  // Read-only snapshot, and where the moving block is right now, so a check
+  // can time a tap rather than guess at it.
+  window.__stack = () => ({
+    status, score, best,
+    height: stack.length,
+    top: stack.length ? { x: stack[stack.length - 1].x, width: stack[stack.length - 1].width } : null,
+    mover: mover ? { x: mover.x, width: mover.width, dir: mover.dir, speed: mover.speed } : null,
+    perfect: PERFECT_TOLERANCE,
+  });
+
   resize();
   render();
   rafId = requestAnimationFrame(loop);

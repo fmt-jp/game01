@@ -18,3 +18,39 @@ pathlib.Path(SHOTS).mkdir(parents=True, exist_ok=True)
 
 # Every check talks to this, which run.sh serves from the repository root.
 BASE = os.environ.get("GAME_URL", "http://localhost:8390")
+
+
+# ---------------------------------------------------------------------------
+# Saying whether something passed.
+#
+# Most of these checks began as scripts that printed what they saw for a
+# person to read, which meant run.sh could not tell a regression from a
+# working game. Everything that decides for itself now goes through check(),
+# and finish() at the end of a file makes the exit code say so.
+import sys as _sys
+
+_failures = []
+
+
+def check(label, cond, detail=""):
+    """Assert something, and say so either way."""
+    print(("  ok   " if cond else "  FAIL ") + label + (f"   {detail}" if detail and not cond else ""))
+    if not cond:
+        _failures.append(label)
+    return bool(cond)
+
+
+def note(text):
+    """Something worth printing that nothing hangs on."""
+    print("       " + str(text))
+
+
+def head(text):
+    print("\n" + str(text))
+
+
+def finish(title="CHECKS"):
+    print("\n" + (f"ALL {title} PASSED" if not _failures else f"{len(_failures)} FAILURES"))
+    for f in _failures:
+        print("  -", f)
+    _sys.exit(1 if _failures else 0)

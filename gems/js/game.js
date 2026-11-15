@@ -142,8 +142,12 @@
       clearTimer = CLEAR_FLASH_MS;
       chain = 1;
     } else {
-      spawnPiece();
+      // The state goes first. spawnPiece() ends the game when the column it
+      // spawns into has no room, and setting "falling" after that wrote
+      // straight over it -- so the board froze instead of ending: nothing
+      // could be placed, nothing scored, and no overlay to start again from.
       gameState = "falling";
+      spawnPiece();
     }
   }
 
@@ -164,8 +168,8 @@
       matchedSet = nextMatches;
       clearTimer = CLEAR_FLASH_MS;
     } else {
+      gameState = "falling";          // before spawnPiece, as above
       spawnPiece();
-      gameState = "falling";
     }
   }
 
@@ -359,6 +363,14 @@
   overlayBtn.addEventListener("click", startGame);
 
   window.addEventListener("resize", sizeCanvas);
+
+  // Read-only snapshot for the automated checks.
+  window.__gems = () => ({
+    state: gameState, score, best, cols: COLS, rows: ROWS,
+    board: board.map((row) => row.slice()),
+    piece: piece ? { col: piece.col, row: piece.row, colors: piece.colors.slice() } : null,
+    next: nextColors.slice(),
+  });
 
   sizeCanvas();
   startGame();

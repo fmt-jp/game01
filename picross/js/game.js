@@ -243,5 +243,13 @@
     render();
   });
 
+  // Read-only snapshot for the automated checks.
+  window.__picross = () => ({
+    puzzle: puzzleIndex, puzzles: PUZZLES.length, rows, cols, mode, solved,
+    clues: { rows: rowClues, cols: colClues },
+    bitmap: bitmap.map((row) => row.slice()),
+    state: state.map((row) => row.slice()),
+  });
+
   loadPuzzle(0);
 })();
