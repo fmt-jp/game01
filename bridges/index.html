@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>はしわたし</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="はしわたし">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <h1>はしわたし</h1>
+        <p class="tagline">数字のぶんだけ橋をかけて、島をひとつながりに。</p>
+      </div>
+      <div class="scores">
+        <div class="score-box">
+          <span class="score-label">LEVEL</span>
+          <span class="score-value" id="level">1</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">のこり</span>
+          <span class="score-value" id="left">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">TIME</span>
+          <span class="score-value" id="timer">0:00</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="howto">
+      <span class="howto-icon" aria-hidden="true">🌉</span>
+      <p><strong>島から島へ指でなぞると橋がかかります。</strong>もう一度なぞると二重橋、もう一度で撤去。橋は交差できません。</p>
+    </div>
+
+    <div class="board-wrap">
+      <canvas id="board"></canvas>
+      <div class="overlay" id="overlay" hidden>
+        <div class="overlay-message" id="overlay-message"></div>
+        <div class="overlay-sub" id="overlay-sub"></div>
+        <button class="btn" id="overlay-btn">次の島へ</button>
+      </div>
+    </div>
+
+    <p class="notice" id="notice"></p>
+
+    <div class="toolbar">
+      <button class="btn ghost" id="hint-btn">ヒント <span id="hint-left">3</span></button>
+      <button class="btn ghost" id="undo-btn">もどす</button>
+      <button class="btn ghost" id="clear-btn">やりなおし</button>
+      <button class="btn ghost" id="new-btn">別の島</button>
+    </div>
+
+    <section class="about">
+      <h2>遊び方</h2>
+      <dl>
+        <dt>橋をかける</dt>
+        <dd>島から島へ指でなぞるか、島を2つ続けてタップします。同じ組をくり返すと <strong>1本 → 2本 → 撤去</strong> と変わります。</dd>
+        <dt>数字</dt>
+        <dd>その島から出る橋の本数です。ちょうどその本数になった島は塗りつぶしに変わり、多すぎる島は赤くなります。</dd>
+        <dt>橋のきまり</dt>
+        <dd>縦か横にまっすぐ、島から島へ。ほかの島や橋をまたぐことはできません。同じ組にかけられるのは2本までです。</dd>
+        <dt>クリア</dt>
+        <dd>すべての数字がぴったりで、<strong>全部の島がひとつながり</strong>になったら完成。数字が合っていても島が離れ小島なら、まだ途中です。</dd>
+        <dt>ヒント</dt>
+        <dd>1回で1か所、正しい状態に直します。3回まで。</dd>
+        <dt>答え</dt>
+        <dd>配る前にソルバで数えていて、答えがちょうど1通りの島だけが出てきます。当てずっぽうは要りません。</dd>
+      </dl>
+    </section>
+
+    <footer>島の配置も数字も毎回生成。答えが1通りであることを確かめてから出しています。</footer>
+  </div>
+
+  <script src="js/puzzle.js"></script>
+  <script src="js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("../sw.js"));
+    }
+  </script>
+</body>
+</html>
