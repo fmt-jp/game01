@@ -63,7 +63,6 @@ with sync_playwright() as pw:
     now = state()
     blank = now["blank"]
     neighbour = next(i for i in range(16) if adjacent(i, blank))
-    far = next(i for i in range(16) if i != blank and not adjacent(i, blank))
     value = now["tiles"][neighbour]
     page.click(f'.tile[data-value="{value}"]')
     page.wait_for_timeout(150)
@@ -73,13 +72,21 @@ with sync_playwright() as pw:
           f'{now["tiles"]} -> {after["tiles"]}')
     check("and that counts as one move", after["moves"] == 1, str(after["moves"]))
 
-    far_value = after["tiles"][far]
-    if far_value:
-        before = state()
+    # Pick this against where the space is *now* -- the tap above moved it --
+    # and keep off its row and column too, since some of these puzzles slide a
+    # whole run at once and that would be a fair move, not a dead one.
+    before = state()
+    gap = before["blank"]
+    far = next((i for i in range(16)
+                if i != gap and not adjacent(i, gap)
+                and i // 4 != gap // 4 and i % 4 != gap % 4), None)
+    if far is not None and before["tiles"][far]:
+        far_value = before["tiles"][far]
         page.click(f'.tile[data-value="{far_value}"]')
         page.wait_for_timeout(150)
         check("tapping one nowhere near it does nothing",
-              state()["tiles"] == before["tiles"] and state()["moves"] == before["moves"])
+              state()["tiles"] == before["tiles"] and state()["moves"] == before["moves"],
+              f'tapped {far_value} at {far}, space at {gap}')
 
     head("[3] solving one all the way, by tapping")
     solved_it = None
