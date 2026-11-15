@@ -10,7 +10,7 @@ Three layers:
   3. The game: an autopilot drives the real key handlers to each stamp, the
      tower and the exit, and the outcomes are asserted from out here.
 """
-import math, pathlib, random, sys
+import math, pathlib, random, sys, time
 from collections import deque
 from playwright.sync_api import sync_playwright
 from _common import CHROMIUM, SHOTS
@@ -235,7 +235,9 @@ with sync_playwright() as pw:
           f"{s0['stampsLeft']} stamps, towers at {s0['towers']}, exit at cell {s0['goal']}")
 
     # the exit must stay shut while a stamp is missing
+    walk_started = time.time()
     res = page.evaluate("(cell) => window.__drive(cell)", s0["goal"])
+    print(f"      walking to the exit took {time.time() - walk_started:.0f}s")
     check("the autopilot can reach the exit", res["reason"] == "arrived",
           f"{res.get('reason')} at cell {res.get('cell')}")
     state = page.evaluate("() => window.__maze3d()")

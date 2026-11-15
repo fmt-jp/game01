@@ -33,7 +33,11 @@ window.__drive = (() => {
     return a;
   };
 
-  return async function drive(targetCell, timeoutMs = 45000, autoDescend = true) {
+  // Measured: walking to the exit of a level-one maze takes 28 to 41 seconds
+  // of real time, because the autopilot walks at the speed the game walks.
+  // Forty-five seconds left a tenth of that as margin, so a slightly longer
+  // maze timed out and the check blamed the game for it.
+  return async function drive(targetCell, timeoutMs = 120000, autoDescend = true) {
     const press = (code, down) =>
       window.dispatchEvent(new KeyboardEvent(down ? "keydown" : "keyup", { code, bubbles: true }));
     let held = null;
