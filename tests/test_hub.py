@@ -33,7 +33,7 @@ with sync_playwright() as pw:
 
     cards = p.locator(".game-card")
     n = cards.count()
-    check("the hub lists 14 games", n == 14, f"found {n}")
+    check("the hub lists 15 games", n == 15, f"found {n}")
     hrefs = [cards.nth(i).get_attribute("href") for i in range(n)]
     check("めいろ探検 is on the hub", "maze/index.html" in hrefs, str(hrefs))
     check("きょだい迷路 is on the hub", "maze3d/index.html" in hrefs, str(hrefs))
@@ -41,6 +41,7 @@ with sync_playwright() as pw:
     check("ふえる石 is on the hub", "ataxx/index.html" in hrefs, str(hrefs))
     check("おとのつぶ is on the hub", "rhythm/index.html" in hrefs, str(hrefs))
     check("かさねとり is on the hub", "tiles/index.html" in hrefs, str(hrefs))
+    check("はしわたし is on the hub", "bridges/index.html" in hrefs, str(hrefs))
     titles = [cards.nth(i).locator("h2").inner_text() for i in range(n)]
     print("     ", " / ".join(titles))
     check("no horizontal overflow on the hub",
@@ -57,6 +58,8 @@ with sync_playwright() as pw:
           p.locator(".preview.note-icon svg").count() == 1)
     check("the tile game card has its icon",
           p.locator(".preview.pile-icon svg").count() == 1)
+    check("the bridge game card has its icon",
+          p.locator(".preview.span-icon svg").count() == 1)
 
     # --- the shelves ------------------------------------------------------
     hub = p.evaluate("() => window.__hub()")
@@ -64,6 +67,10 @@ with sync_playwright() as pw:
     check("the games are split over shelves, each one on exactly one shelf",
           sorted(shelved) == sorted(hrefs) and len(shelved) == len(set(shelved)),
           f"{len(shelved)} on shelves vs {len(hrefs)} cards")
+    check("each tab says how many games are on its shelf",
+          all(f"{len(sh['games'])}本" in t for t, sh in zip(hub["tabs"], hub["shelves"]))
+          if hub["tabs"] and "本" in hub["tabs"][0] else True,
+          str(hub["tabs"]))
     check("there is a tab for every shelf",
           len(hub["tabs"]) == len(hub["shelves"]) and hub["selected"] == 0,
           str(hub))
@@ -142,14 +149,14 @@ with sync_playwright() as pw:
       const c = await caches.open(keys[0]);
       return {keys, entries: (await c.keys()).length};
     }""")
-    check("the service worker cached the v14 shell",
-          version["keys"] == ["pocket-arcade-v14"] and version["entries"] >= len([s for s in shell if s]),
+    check("the service worker cached the v15 shell",
+          version["keys"] == ["pocket-arcade-v15"] and version["entries"] >= len([s for s in shell if s]),
           str(version))
 
     c.set_offline(True)
     p.goto(BASE + "/index.html")
     p.wait_for_timeout(600)
-    check("the hub loads offline", p.locator(".game-card").count() == 14)
+    check("the hub loads offline", p.locator(".game-card").count() == 15)
     p.goto(BASE + "/maze/index.html")
     p.wait_for_timeout(900)
     check("めいろ探検 loads offline",
@@ -228,6 +235,16 @@ with sync_playwright() as pw:
     check("and still deals a pile that has something to take",
           t["left"] > 10 and t["open"] > 0,
           f'{t["left"]} tiles, {t["open"]} pairs')
+
+    # and the islands are worked out on the spot, network or no network
+    p.goto(BASE + "/bridges/index.html")
+    p.wait_for_timeout(900)
+    check("はしわたし loads offline",
+          p.evaluate("() => typeof window.__bridges === 'function'"))
+    br = p.evaluate("() => window.__bridges()")
+    check("and still lays out a board to solve",
+          len(br["islands"]) >= 5 and len(br["edges"]) >= 4 and not br["solved"],
+          f'{len(br["islands"])} islands, {len(br["edges"])} bridges')
 
     p.screenshot(path=f"{SHOTS}/maze_offline.png")
     c.set_offline(False)

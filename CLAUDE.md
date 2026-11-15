@@ -8,7 +8,7 @@ its own directory and is self-contained.
 
 ## What is here
 
-Fourteen games, all on `main` and live. Service worker at `pocket-arcade-v14`;
+Fifteen games, all on `main` and live. Service worker at `pocket-arcade-v15`;
 the whole site, every game included, works offline once visited.
 
 | Directory | Name | Kind | Worth knowing |
@@ -27,6 +27,7 @@ the whole site, every game included, works offline once visited.
 | `ataxx/` | ふえる石 | board game vs AI | clone or jump, converting what you land beside |
 | `rhythm/` | おとのつぶ | rhythm | song and chart both generated; WebAudio synthesis only |
 | `tiles/` | かさねとり | mahjong solitaire | the pile is dealt by taking an empty one apart |
+| `bridges/` | はしわたし | hashiwokakero | built answer-first, kept only when the answer is the only one |
 
 ## Ground rules
 
@@ -50,10 +51,11 @@ Shared across every game, so the collection reads as one thing:
   (numerals), all from Google Fonts.
 - A dark ground, with **one accent colour per game**. Taken so far: ember, gold,
   teal, violet, blue, pink, green, crimson, amber, sky, timber, orchid, lime,
-  indigo, jade.
+  indigo, jade, mist (a pale desaturated blue — the first one picked for its
+  lightness rather than its hue).
   A new game picks a new one and uses it for its own page and for its hub card.
-  Fourteen in, the hues are close to used up: the next one will have to
-  differ by lightness, not by hue.
+  Fifteen in, the hues are used up: a new one now differs by lightness or
+  by how washed out it is, the way mist does.
 - The same page furniture in the same order: masthead with score boxes, a 遊び方
   one-liner, the board, the controls, then a 遊び方 section at the bottom.
 - The hub is not one list: it is three shelves side by side, snapped, with a
@@ -122,7 +124,7 @@ check rather than a setup gap.
 Nothing here is a known bug — the games all work. These are the things a next
 session would most usefully pick up, roughly in that order.
 
-1. **Fourteen of the twenty-six checks cannot fail.** They print findings a person
+1. **Fourteen of the twenty-eight checks cannot fail.** They print findings a person
    read at the time instead of asserting. `tests/README.md` names them. Until
    they are converted, a green `tests/run.sh` means "nothing crashed" for those
    games. Worth doing one game at a time.
@@ -153,7 +155,11 @@ session would most usefully pick up, roughly in that order.
    phones, and the ズレ調整 buttons leave it to the player to find by feel. A
    calibration round — tap along to a bare metronome, take the median of the
    errors — would set it properly.
-8. **`tiles/` stacks on an aligned grid.** Real 上海 layouts offset tiles by
+8. **`bridges/` runs out of room at level 12.** The board caps at 7 by 9 with
+   24 islands, because a phone cannot show more and still leave an island big
+   enough to tap, so the search depth stops climbing there. A harder board
+   would have to come from the shape of the clues rather than the size.
+9. **`tiles/` stacks on an aligned grid.** Real 上海 layouts offset tiles by
    half a width, which is prettier and makes the free rule harder (a half-gap
    is not enough to slide through). The pile is a mirrored height map instead,
    which looks built but means every layout is a mound. Half-offsets would
@@ -198,3 +204,7 @@ session would most usefully pick up, roughly in that order.
   too. A check that read the brightness of a buried tile was really reading
   the tile standing on it, and reported a 17-point difference where the real
   one was 97. Measure something nothing covers, or crop to the part that shows.
+- Scanning along a row from an island needs a far edge to stop at. Looking
+  rightwards from the rightmost island in `bridges/` ran off down the number
+  line and hung the page, with nothing in the console to say why. Any walk
+  outward from a cell wants both ends bounded.
