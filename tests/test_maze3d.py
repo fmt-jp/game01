@@ -416,25 +416,32 @@ with sync_playwright() as pw:
     # a step away, the whole picture is fence, floor included -- which is the
     # right answer, just not the one this is asking about.
     low_r, low_g = channel(0.88, 0), channel(0.88, 1)
-    turns = 0
-    while low_g <= low_r + 8 and turns < 7:
+    swept, turns = 0.0, 0
+    while low_g <= low_r + 8 and swept < 2 * 3.1416:
+        was = page.evaluate("() => window.__maze3d().angle")
         page.evaluate("""async () => {
           const press = (code, down) => window.dispatchEvent(
             new KeyboardEvent(down ? 'keydown' : 'keyup', { code }));
           press('ArrowRight', true);
-          await new Promise((r) => setTimeout(r, 220));
+          await new Promise((r) => setTimeout(r, 420));
           press('ArrowRight', false);
           await new Promise((r) => setTimeout(r, 120));
         }""")
-        low_r, low_g = channel(0.88, 0), channel(0.88, 1)
+        now = page.evaluate("() => window.__maze3d().angle")
+        step = abs(now - was)
+        swept += min(step, 2 * 3.1416 - step)   # how far round we really went
         turns += 1
+        low_r, low_g = channel(0.88, 0), channel(0.88, 1)
+        if turns > 40:
+            break
     mid_r, mid_g = channel(0.5, 0), channel(0.5, 1)
     check("what is underfoot is the grass", low_g > low_r + 8,
-          f"red {low_r:.0f}, green {low_g:.0f} after {turns} turns")
+          f"red {low_r:.0f}, green {low_g:.0f} after looking "
+          f"{swept * 57:.0f} degrees around")
     check("and the fence above it is still fence, not grass over the top",
           mid_r > mid_g, f"red {mid_r:.0f}, green {mid_g:.0f}")
     print(f"      ground red {low_r:.0f}/green {low_g:.0f}, "
-          f"fence red {mid_r:.0f}/green {mid_g:.0f}, after {turns} turns")
+          f"fence red {mid_r:.0f}/green {mid_g:.0f}, after looking {swept * 57:.0f} degrees around")
 
     check("no page errors", not [e for e in errors if "ERR_" not in e], str(errors))
     browser.close()

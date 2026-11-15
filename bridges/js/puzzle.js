@@ -183,7 +183,16 @@ const Puzzle = (() => {
         }
       }
       if (pick === -1) {
-        if (connected(islands, edges, counts)) found.push(counts.slice());
+        // Every island, not just the ones the search stopped at: an island
+        // whose bridges were all settled by its neighbours is never picked,
+        // so its own number has to be checked here, or an arrangement that
+        // leaves it short would be counted as an answer.
+        const ends = new Array(islands.length).fill(0);
+        edges.forEach((e, n) => { ends[e.a] += counts[n]; ends[e.b] += counts[n]; });
+        if (ends.every((n, i) => n === islands[i].need)
+            && connected(islands, edges, counts)) {
+          found.push(counts.slice());
+        }
         return;
       }
       for (const option of best.out) {

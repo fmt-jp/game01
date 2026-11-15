@@ -161,8 +161,17 @@ def solutions(islands, edges, limit=2, require_joined=True):
                 if len(got[1]) <= 1:
                     break
         if pick == -1:
-            if not require_joined or joined(islands, edges, counts):
-                found.append(counts[:])
+            # Every island, not just the ones the search stopped at. An island
+            # whose bridges were all settled by its neighbours is never picked,
+            # so its own number has to be checked here or an arrangement that
+            # leaves it short counts as an answer.
+            ends = [0] * len(islands)
+            for n, (a, b) in enumerate(edges):
+                ends[a] += counts[n]
+                ends[b] += counts[n]
+            if all(ends[i] == islands[i]["need"] for i in range(len(islands))):
+                if not require_joined or joined(islands, edges, counts):
+                    found.append(counts[:])
             return
         free, options = best
         for option in options:
