@@ -33,6 +33,7 @@ const APP_SHELL = [
   "./barcode/",
   "./barcode/index.html",
   "./barcode/css/style.css",
+  "./barcode/js/scanner.js",
   "./barcode/js/monster.js",
   "./barcode/js/game.js",
   "./flow/",

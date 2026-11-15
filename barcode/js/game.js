@@ -35,7 +35,7 @@
 
   let currentMonster = null;
   let mediaStream = null;
-  let zxingReader = null;
+  let scanCanvas = null;
   let detectRAF = null;
   let scanMode = "new"; // "new" | "opponent"
   let editingDex = false;
@@ -221,10 +221,12 @@
     await scanVideo.play();
     scanStatus.textContent = "バーコードを枠内に写してください";
 
+    // The browser's own reader where there is one; ours everywhere else.
+    // Ours is in this repository, so scanning works with no network at all.
     if ("BarcodeDetector" in window) {
       startNativeDetection();
     } else {
-      startZXingDetection();
+      startOwnDetection();
     }
   }
 
@@ -248,35 +250,38 @@
     detectRAF = requestAnimationFrame(tick);
   }
 
-  function startZXingDetection() {
-    if (typeof ZXing === "undefined") {
-      scanStatus.textContent = "バーコード読み取り機能を読み込めませんでした。通信環境を確認してください。";
-      return;
-    }
-    const hints = new Map();
-    const formats = [
-      ZXing.BarcodeFormat.EAN_13,
-      ZXing.BarcodeFormat.EAN_8,
-      ZXing.BarcodeFormat.UPC_A,
-      ZXing.BarcodeFormat.UPC_E,
-    ];
-    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
-    zxingReader = new ZXing.BrowserMultiFormatReader(hints);
-    zxingReader.decodeFromVideoElement(scanVideo, (result, err) => {
-      if (result) {
-        onCodeDetected(result.getText());
+  // Our own reader: copy the frame onto a canvas and let scanner.js look
+  // across it. Reading one frame costs a few milliseconds, so this can run
+  // on every animation frame without troubling the picture.
+  function startOwnDetection() {
+    if (!scanCanvas) scanCanvas = document.createElement("canvas");
+    const ctx = scanCanvas.getContext("2d", { willReadFrequently: true });
+    const tick = () => {
+      if (!mediaStream) return;
+      const vw = scanVideo.videoWidth;
+      const vh = scanVideo.videoHeight;
+      if (vw && vh) {
+        // Wider than this buys nothing: the bars are already several pixels
+        // across, and the work is per pixel.
+        const scale = Math.min(1, 720 / vw);
+        scanCanvas.width = Math.round(vw * scale);
+        scanCanvas.height = Math.round(vh * scale);
+        ctx.drawImage(scanVideo, 0, 0, scanCanvas.width, scanCanvas.height);
+        const code = Scanner.decodeCanvas(scanCanvas);
+        if (code) {
+          onCodeDetected(code);
+          return;
+        }
       }
-    });
+      detectRAF = requestAnimationFrame(tick);
+    };
+    detectRAF = requestAnimationFrame(tick);
   }
 
   function stopScan() {
     if (detectRAF) {
       cancelAnimationFrame(detectRAF);
       detectRAF = null;
-    }
-    if (zxingReader) {
-      try { zxingReader.reset(); } catch (e) {}
-      zxingReader = null;
     }
     if (mediaStream) {
       mediaStream.getTracks().forEach((t) => t.stop());
