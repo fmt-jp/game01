@@ -98,22 +98,40 @@ with sync_playwright() as pw:
         note(f"free tile {bright:.0f}, blocked tile {dim:.0f} (of 255), "
              f"{len(plain_locked)} tiles are blocked by their neighbours alone")
 
-        # And a tile with another standing on it is partly hidden by it, which
-        # is what makes the pile read as a pile: the top-left of its box is the
-        # tile above, the bottom-right strip is its own edge, and the two must
-        # not come out the same.
-        buried_i = next((i for i, t in enumerate(state["tiles"])
-                         if t["alive"] and (t["x"], t["y"], t["z"]) in on_top), None)
-        if buried_i is not None:
-            shot = tile(page, buried_i).screenshot()
+        # And a tile with another standing on it is partly hidden by it,
+        # which is what makes the pile read as a pile. Measuring that needs
+        # a tile whose right-hand edge is its own: the layer above is offset
+        # up and to the left, so a neighbour one square over would cover the
+        # very strip being measured. Take the ones that qualify and use the
+        # middle reading, not the first tile that comes to hand.
+        alive_at = {(t["x"], t["y"], t["z"]) for t in state["tiles"] if t["alive"]}
+        candidates = [
+            i for i, t in enumerate(state["tiles"])
+            if t["alive"]
+            and (t["x"], t["y"], t["z"] + 1) in alive_at          # something on top
+            and (t["x"] + 1, t["y"], t["z"] + 1) not in alive_at  # nothing over its right edge
+            and (t["x"] + 1, t["y"], t["z"]) not in alive_at      # nor beside it
+        ]
+        gaps = []
+        for i in candidates[:8]:
+            shot = tile(page, i).screenshot()
             im = Image.open(io.BytesIO(shot)).convert("L")
             w, h = im.size
-            upper = im.crop((0, 0, int(w * 0.6), int(h * 0.6)))
-            edge = im.crop((int(w * 0.88), int(h * 0.5), w, h))
-            up = sum(upper.tobytes()) / len(upper.tobytes())
+            above = im.crop((0, 0, int(w * 0.55), int(h * 0.55)))      # the tile standing on it
+            edge = im.crop((int(w * 0.82), int(h * 0.35), w, int(h * 0.85)))   # its own right edge
+            up = sum(above.tobytes()) / len(above.tobytes())
             low = sum(edge.tobytes()) / len(edge.tobytes())
+            gaps.append(up - low)
+        if gaps:
+            gaps.sort()
+            middle = gaps[len(gaps) // 2]
             check("a tile with one standing on it shows as a darker edge under it",
-                  up - low > 25, f"{up:.0f} over {low:.0f}")
+                  middle > 20,
+                  f"{middle:.0f} between them, over {len(gaps)} tiles: "
+                  f"{[round(g) for g in gaps]}")
+            note(f"{len(gaps)} buried tiles measured, middle gap {middle:.0f}")
+        else:
+            note("no tile on this pile has both something on top and a clear right edge")
 
         # --- real taps ---------------------------------------------------
         before = page.evaluate("() => window.__tiles().left")

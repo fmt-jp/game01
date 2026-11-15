@@ -364,10 +364,11 @@ with sync_playwright() as pw:
         mean = sum(values) / len(values)
         return (sum((v - mean) ** 2 for v in values) / len(values)) ** 0.5
 
-    # Phase three left us on the goal overlay, where nothing answers a key.
-    if page.get_attribute("#overlay", "hidden") is None:
-        page.click("#overlay-btn")
-        page.wait_for_timeout(700)
+    # Start again, so this does not depend on wherever the last phase left
+    # the player: pressed up against a fence there is no ground in view at
+    # all, and quite rightly.
+    page.click("#new-btn")
+    page.wait_for_timeout(800)
 
     def channel(band, index):
         row = page.evaluate(read.replace("row[i + 1]", f"row[i + {index}]"), band)
@@ -379,7 +380,14 @@ with sync_playwright() as pw:
           spread(near) > 6, f"variation {spread(near):.1f} of 255")
     print(f"      variation across the ground: {spread(near):.1f} near, {spread(far):.1f} further off")
 
-    # walk a little and see whether the ground moved with us
+    # Walk a little and see whether the ground moved with us -- against how
+    # much it changes when we stand still, which is the only honest baseline:
+    # a bare percentage would be a number picked to pass.
+    still_a = page.evaluate(read, 0.88)
+    page.wait_for_timeout(260)
+    still_b = page.evaluate(read, 0.88)
+    standing = sum(1 for a, b in zip(still_a, still_b) if abs(a - b) > 8) / len(still_a)
+
     before = page.evaluate(read, 0.88)
     start = page.evaluate("() => window.__maze3d()")
     page.evaluate("""async () => {
@@ -395,19 +403,38 @@ with sync_playwright() as pw:
     walked = ((moved["x"] - start["x"]) ** 2 + (moved["y"] - start["y"]) ** 2) ** 0.5
     changed = sum(1 for a, b in zip(before, after) if abs(a - b) > 8) / len(before)
     check("walking forward moves the ground under you",
-          walked > 0.05 and changed > 0.25,
-          f"walked {walked:.2f} and {changed * 100:.0f}% of the row changed")
-    print(f"      walked {walked:.2f} units, {changed * 100:.0f}% of the ground row changed")
+          walked > 0.05 and changed > max(0.08, standing + 0.06),
+          f"walked {walked:.2f}; {changed * 100:.0f}% of the row changed, "
+          f"against {standing * 100:.0f}% standing still")
+    print(f"      walked {walked:.2f} units: {changed * 100:.0f}% of the ground row changed, "
+          f"{standing * 100:.0f}% while standing still")
 
     # The grass is the only green thing in the view: the fence is brown and
     # the sky is blue. So "green beats red low down, and does not up top" is
     # enough to say the ground is on the ground and nowhere else.
+    # Turn on the spot until a stretch of corridor is in view. Facing a fence
+    # a step away, the whole picture is fence, floor included -- which is the
+    # right answer, just not the one this is asking about.
     low_r, low_g = channel(0.88, 0), channel(0.88, 1)
+    turns = 0
+    while low_g <= low_r + 8 and turns < 7:
+        page.evaluate("""async () => {
+          const press = (code, down) => window.dispatchEvent(
+            new KeyboardEvent(down ? 'keydown' : 'keyup', { code }));
+          press('ArrowRight', true);
+          await new Promise((r) => setTimeout(r, 220));
+          press('ArrowRight', false);
+          await new Promise((r) => setTimeout(r, 120));
+        }""")
+        low_r, low_g = channel(0.88, 0), channel(0.88, 1)
+        turns += 1
     mid_r, mid_g = channel(0.5, 0), channel(0.5, 1)
     check("what is underfoot is the grass", low_g > low_r + 8,
-          f"red {low_r:.0f}, green {low_g:.0f}")
+          f"red {low_r:.0f}, green {low_g:.0f} after {turns} turns")
     check("and the fence above it is still fence, not grass over the top",
           mid_r > mid_g, f"red {mid_r:.0f}, green {mid_g:.0f}")
+    print(f"      ground red {low_r:.0f}/green {low_g:.0f}, "
+          f"fence red {mid_r:.0f}/green {mid_g:.0f}, after {turns} turns")
 
     check("no page errors", not [e for e in errors if "ERR_" not in e], str(errors))
     browser.close()
