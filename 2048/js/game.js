@@ -278,6 +278,12 @@
 
   window.addEventListener("resize", () => render(true));
 
+  // Read-only snapshot for the automated checks.
+  window.__2048 = () => ({
+    grid: grid.map((row) => row.map((cell) => (cell ? cell.value : 0))),
+    score, best, won: hasWon, over: isGameOver,
+  });
+
   bestEl.textContent = String(best);
   startGame();
 })();

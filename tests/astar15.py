@@ -50,14 +50,22 @@ def neighbors(p):
     if c < SIZE - 1: result.append(p + 1)
     return result
 
-def solve(start, max_nodes=400000):
+def solve(start, max_nodes=400000, weight=1.0):
+    """A* over the sliding puzzle.
+
+    With weight 1 the answer is the shortest there is, which is what you want
+    when counting moves -- and what runs out of nodes on a bad shuffle. A
+    check only needs a route that works, so it asks for a heavier weight: the
+    search then leans on the heuristic, finds a longer path, and finds it in a
+    fraction of the nodes.
+    """
     start = tuple(start)
     if start == GOAL:
         return []
     g_score = {start: 0}
     h0 = heuristic(start)
     counter = 0
-    heap = [(h0, 0, counter, start, [])]
+    heap = [(h0 * weight, 0, counter, start, [])]
     visited = set()
     nodes = 0
     while heap:
@@ -82,5 +90,5 @@ def solve(start, max_nodes=400000):
                 if new_state == GOAL:
                     return new_path
                 counter += 1
-                heapq.heappush(heap, (ng + heuristic(new_state), ng, counter, new_state, new_path))
+                heapq.heappush(heap, (ng + weight * heuristic(new_state), ng, counter, new_state, new_path))
     return None

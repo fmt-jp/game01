@@ -183,5 +183,11 @@
 
   window.addEventListener("resize", render);
 
+  // Read-only snapshot for the automated checks.
+  window.__fifteen = () => ({
+    tiles: tiles.slice(), blank: blankPos, moves,
+    solved: tiles.every((v, i) => v === (i === SIZE * SIZE - 1 ? 0 : i + 1)),
+  });
+
   shuffle();
 })();
