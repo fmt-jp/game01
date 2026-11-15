@@ -149,8 +149,8 @@ with sync_playwright() as pw:
       const c = await caches.open(keys[0]);
       return {keys, entries: (await c.keys()).length};
     }""")
-    check("the service worker cached the v15 shell",
-          version["keys"] == ["pocket-arcade-v15"] and version["entries"] >= len([s for s in shell if s]),
+    check("the service worker cached the v16 shell",
+          version["keys"] == ["pocket-arcade-v16"] and version["entries"] >= len([s for s in shell if s]),
           str(version))
 
     c.set_offline(True)

@@ -8,7 +8,7 @@ its own directory and is self-contained.
 
 ## What is here
 
-Fifteen games, all on `main` and live. Service worker at `pocket-arcade-v15`;
+Fifteen games, all on `main` and live. Service worker at `pocket-arcade-v16`;
 the whole site, every game included, works offline once visited.
 
 | Directory | Name | Kind | Worth knowing |
@@ -19,10 +19,10 @@ the whole site, every game included, works offline once visited.
 | `picross/` | おえかきロジック | nonogram | only boards with a unique solution are used |
 | `fifteen/` | 15パズル | slide | random every time, parity-checked as solvable |
 | `gems/` | 宝石パズル | falling blocks | Columns-like, real time |
-| `barcode/` | バーコードモンスター | camera | a product barcode makes a monster; battles; a 図鑑 |
+| `barcode/` | バーコードモンスター | camera | own EAN-13/8 reader; a product barcode makes a monster |
 | `flow/` | ラインつなぎ | line drawing | generated, with a solution guaranteed to exist |
 | `maze/` | めいろ探検 | 2D maze | keys gate the exit, lantern fuel drains per step |
-| `maze3d/` | きょだい迷路 | 3D first person | own raycaster, stamp rally, lookout tower |
+| `maze3d/` | きょだい迷路 | 3D first person | own raycaster with floor casting, stamp rally, tower |
 | `words/` | ことばの輪 | word puzzle | trace a kana wheel to fill a generated crossword |
 | `ataxx/` | ふえる石 | board game vs AI | clone or jump, converting what you land beside |
 | `rhythm/` | おとのつぶ | rhythm | song and chart both generated; WebAudio synthesis only |
@@ -33,9 +33,10 @@ the whole site, every game included, works offline once visited.
 
 - **No build step, no framework, no bundler.** Plain HTML, CSS and JavaScript,
   served as-is. A change must be visible by reloading the page.
-- **No runtime dependencies** beyond Google Fonts. (One exception is documented
-  under *Known limitations*.) Anything a game needs, it draws or computes
-  itself.
+- **No runtime dependencies** beyond Google Fonts. Nothing else is fetched at
+  runtime, from anywhere. Anything a game needs, it draws or computes itself --
+  including reading a barcode off the camera, which `barcode/js/scanner.js`
+  does from the EAN tables rather than from a library.
 - **Everything is generated.** No fixed level lists that run out: mazes,
   puzzles, monsters and boards are produced from a seed or a barcode, and are
   checked to be solvable before they reach the player.
@@ -125,38 +126,32 @@ check rather than a setup gap.
 Nothing here is a known bug — the games all work. These are the things a next
 session would most usefully pick up, roughly in that order.
 
-1. **`barcode/` depends on a CDN.** It loads ZXing as a fallback for browsers
-   without `BarcodeDetector` (notably iOS Safari), which is the only external
-   dependency in the repository and means scanning does not work offline on
-   those browsers. Vendoring the library would fix it; documenting it as a
-   limitation is the cheaper alternative.
-2. **`maze3d/` has no floor texture**, so in open spaces there is little sense
-   of movement — the walls carry it alone. Floor casting at reduced resolution
-   would work without costing the frame budget. Also, a tower is only visible in
-   line of sight: the depth buffer is per column, so its roof cannot be seen
-   over a fence.
-3. **`barcode/`'s 図鑑 is read-only.** You cannot pick a monster from it to
+1. **`maze3d/`'s towers are only visible in line of sight.** The depth buffer
+   is per column, so a tower's roof cannot be seen over a fence that is nearer
+   than it — you walk round a corner and it appears. Sprites would need a
+   per-pixel depth test, or towers their own pass drawn before the walls.
+2. **`barcode/`'s 図鑑 is read-only.** You cannot pick a monster from it to
    fight with; only the one just scanned can battle.
-4. **The shelves are hand-sorted.** Each game sits on そろえる, かんがえる or
+3. **The shelves are hand-sorted.** Each game sits on そろえる, かんがえる or
    うごかす because a person put it there, and a few are arguable (`gems/` is
    real time but is shelved with the matching games, `ataxx/` is a board game
    among the thinking ones). Past twenty games a shelf will want splitting,
    and nothing stops a shelf growing past a screenful.
-5. **`words/` draws its base words from a finite pool** — roughly 1,400 five and
+4. **`words/` draws its base words from a finite pool** — roughly 1,400 five and
    six kana words survive the variety rule — so the boards are generated but not
    literally endless. Building the wheel from a letter set rather than a single
    word would widen it, at the cost of the promise that one answer uses every
    letter.
-6. **`rhythm/`'s latency offset cannot be measured for the player.** The initial
+5. **`rhythm/`'s latency offset cannot be measured for the player.** The initial
    value comes from `AudioContext.outputLatency`, which is wrong on plenty of
    phones, and the ズレ調整 buttons leave it to the player to find by feel. A
    calibration round — tap along to a bare metronome, take the median of the
    errors — would set it properly.
-7. **`bridges/` runs out of room at level 12.** The board caps at 7 by 9 with
+6. **`bridges/` runs out of room at level 12.** The board caps at 7 by 9 with
    24 islands, because a phone cannot show more and still leave an island big
    enough to tap, so the search depth stops climbing there. A harder board
    would have to come from the shape of the clues rather than the size.
-8. **`tiles/` stacks on an aligned grid.** Real 上海 layouts offset tiles by
+7. **`tiles/` stacks on an aligned grid.** Real 上海 layouts offset tiles by
    half a width, which is prettier and makes the free rule harder (a half-gap
    is not enough to slide through). The pile is a mirrored height map instead,
    which looks built but means every layout is a mound. Half-offsets would
@@ -210,3 +205,11 @@ session would most usefully pick up, roughly in that order.
   places, and spawnPiece is exactly where a full column is noticed, so the
   board froze instead of finishing: nothing placeable, nothing scored, no
   overlay to start again from. Set the state first, then call.
+- A synthetic `KeyboardEvent` reaches a handler only through the field that
+  handler reads. `maze3d/` switches on `e.code`, so an event built with `key`
+  alone is dropped in silence and the check appears to drive a player who
+  never moves. Set both.
+- Reading a barcode wants two thresholds, not one. A single level for the
+  whole line loses a packet lit from one side; a local average follows a
+  blurred bar into its own middle and splits it. `barcode/` tries the plain
+  one first and local windows after, over a few strengths of smoothing.

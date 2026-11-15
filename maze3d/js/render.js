@@ -188,6 +188,38 @@ const MazeView = (() => {
     return c;
   }
 
+  // The ground, as one square metre of it. Cast across the floor this gives
+  // somewhere to see movement: in an open space the walls are far away and
+  // too slow to say how fast you are walking.
+  function groundTexture() {
+    const S = 128;
+    const c = makeCanvas(S, S);
+    const g = c.getContext("2d");
+    const rand = rng(0x6704);
+    g.fillStyle = "#3f6b3b";
+    g.fillRect(0, 0, S, S);
+    // tufts of grass, slightly different greens
+    for (let i = 0; i < 1100; i++) {
+      const shade = 52 + Math.floor(rand() * 46);
+      g.fillStyle = `rgb(${Math.floor(shade * 0.72)}, ${shade + 28}, ${Math.floor(shade * 0.68)})`;
+      const x = rand() * S, y = rand() * S;
+      g.fillRect(x, y, 1 + rand() * 2.4, 1 + rand() * 2);
+    }
+    // worn earth, and a few stones, so one square is told from the next
+    for (let i = 0; i < 70; i++) {
+      g.fillStyle = `rgba(118, 96, 62, ${0.2 + rand() * 0.3})`;
+      g.beginPath();
+      g.ellipse(rand() * S, rand() * S, 2 + rand() * 5, 1.5 + rand() * 3.5, rand() * Math.PI, 0, Math.PI * 2);
+      g.fill();
+    }
+    for (let i = 0; i < 46; i++) {
+      const tone = 128 + Math.floor(rand() * 60);
+      g.fillStyle = `rgb(${tone}, ${tone - 6}, ${tone - 18})`;
+      g.fillRect(rand() * S, rand() * S, 1 + rand() * 2, 1 + rand() * 2);
+    }
+    return g.getImageData(0, 0, S, S);
+  }
+
   function create(canvas) {
     const ctx = canvas.getContext("2d", { alpha: false });
     const textures = {
@@ -196,8 +228,10 @@ const MazeView = (() => {
       gateOpen: gateTexture(true),
       tower: towerTexture(),
       stamps: {},
+      ground: groundTexture(),
     };
-    const state = { w: 0, h: 0, step: 1, columns: 0, depth: null, skyline: null, ringW: 0 };
+    const state = { w: 0, h: 0, step: 1, columns: 0, depth: null, skyline: null, ringW: 0,
+                    floor: null, floorPixels: null, floorStep: 3 };
 
     function stampTex(color) {
       if (!textures.stamps[color]) textures.stamps[color] = stampTexture(color);
@@ -216,6 +250,15 @@ const MazeView = (() => {
       state.depth = new Float32Array(state.columns);
       state.ringW = Math.round((2 * Math.PI * state.w) / FOV);
       state.skyline = skylineTexture(state.ringW, Math.round(state.h * 0.3));
+
+      // The floor is cast at a fraction of the screen's resolution and then
+      // stretched over it. Ground seen at a slant has no detail to lose, and
+      // this keeps a frame's worth of floor at a few thousand samples.
+      state.floorStep = Math.max(2, Math.round(dpr * 2));
+      const fw = state.columns;
+      const fh = Math.ceil(state.h / state.floorStep) + 2;
+      state.floor = makeCanvas(fw, fh);
+      state.floorPixels = state.floor.getContext("2d").createImageData(fw, fh);
       ctx.imageSmoothingEnabled = true;
     }
 
@@ -236,12 +279,65 @@ const MazeView = (() => {
         ctx.drawImage(state.skyline, offset + state.ringW, top);
       }
 
-      const ground = ctx.createLinearGradient(0, horizon, 0, h);
-      ground.addColorStop(0, "#4a7c45");
-      ground.addColorStop(0.35, "#3d6b3a");
-      ground.addColorStop(1, "#2c4f2c");
-      ctx.fillStyle = ground;
-      ctx.fillRect(0, horizon, w, h - horizon);
+      drawFloor(camera, horizon);
+    }
+
+    // Floor casting. A row of the screen below the horizon is all one depth:
+    // invert the wall projection to get it, walk the world point from the
+    // left edge of the view to the right, and read the ground tile at each
+    // step. Same fog as the walls, so the far ground meets the skyline.
+    function drawFloor(camera, horizon) {
+      const { w, h, floor, floorPixels, floorStep } = state;
+      const top = Math.max(0, Math.floor(horizon));
+      if (!floor || top >= h) return;
+
+      const dirX = Math.cos(camera.angle), dirY = Math.sin(camera.angle);
+      const planeX = -dirY * HALF_FOV_TAN, planeY = dirX * HALF_FOV_TAN;
+      const tex = textures.ground;
+      const S = tex.width;
+      const data = floorPixels.data;
+      const fw = floor.width;
+      const rows = Math.ceil((h - top) / floorStep);
+
+      for (let j = 0; j < rows; j++) {
+        const y = top + j * floorStep + floorStep / 2;
+        const below = y - horizon;
+        if (below <= 0.5) {
+          // the horizon itself: nothing but fog
+          for (let i = 0; i < fw; i++) {
+            const at = (j * fw + i) * 4;
+            data[at] = 178; data[at + 1] = 205; data[at + 2] = 226; data[at + 3] = 255;
+          }
+          continue;
+        }
+        // the inverse of bottom = horizon + EYE * w / (2 * tan * perp)
+        const perp = (EYE * w) / (2 * HALF_FOV_TAN * below);
+        const leftX = camera.x + (dirX - planeX) * perp;
+        const leftY = camera.y + (dirY - planeY) * perp;
+        const rightX = camera.x + (dirX + planeX) * perp;
+        const rightY = camera.y + (dirY + planeY) * perp;
+        const stepX = (rightX - leftX) / fw;
+        const stepY = (rightY - leftY) / fw;
+
+        const fog = Math.min(0.92, fogAlpha(perp) * 1.5);
+        const keep = 1 - fog;
+        let wx = leftX, wy = leftY;
+        for (let i = 0; i < fw; i++, wx += stepX, wy += stepY) {
+          let tx = Math.floor((wx - Math.floor(wx)) * S);
+          let ty = Math.floor((wy - Math.floor(wy)) * S);
+          if (tx < 0) tx = 0; else if (tx >= S) tx = S - 1;
+          if (ty < 0) ty = 0; else if (ty >= S) ty = S - 1;
+          const src = (ty * S + tx) * 4;
+          const at = (j * fw + i) * 4;
+          data[at] = tex.data[src] * keep + 178 * fog;
+          data[at + 1] = tex.data[src + 1] * keep + 205 * fog;
+          data[at + 2] = tex.data[src + 2] * keep + 226 * fog;
+          data[at + 3] = 255;
+        }
+      }
+
+      floor.getContext("2d").putImageData(floorPixels, 0, 0);
+      ctx.drawImage(floor, 0, 0, fw, rows, 0, top, w, h - top);
     }
 
     function fogAlpha(dist) {

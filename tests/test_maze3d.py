@@ -339,6 +339,76 @@ with sync_playwright() as pw:
     check("frames stay inside a 60fps budget", timing["median"] <= 17.5, str(timing))
     check("no stalls worse than two frames", timing["p95"] <= 34, str(timing))
 
+    # ------------------------------------------------------------------
+    # The floor is cast, not painted flat. Two things have to be true for it
+    # to do its job: it has to have detail at all, and that detail has to move
+    # with you -- in an open stretch the walls are too far off to say how
+    # fast you are walking, which is what the floor is there for.
+    print("\n[6] the ground underfoot")
+    read = """
+      (band) => {
+        const canvas = document.getElementById('view');
+        const c = document.createElement('canvas');
+        c.width = canvas.width; c.height = canvas.height;
+        const g = c.getContext('2d');
+        g.drawImage(canvas, 0, 0);
+        const y = Math.round(canvas.height * band);
+        const row = g.getImageData(0, y, canvas.width, 1).data;
+        const out = [];
+        for (let i = 0; i < row.length; i += 4) out.push(row[i + 1]);
+        return out;
+      }
+    """
+
+    def spread(values):
+        mean = sum(values) / len(values)
+        return (sum((v - mean) ** 2 for v in values) / len(values)) ** 0.5
+
+    # Phase three left us on the goal overlay, where nothing answers a key.
+    if page.get_attribute("#overlay", "hidden") is None:
+        page.click("#overlay-btn")
+        page.wait_for_timeout(700)
+
+    def channel(band, index):
+        row = page.evaluate(read.replace("row[i + 1]", f"row[i + {index}]"), band)
+        return sum(row) / len(row)
+
+    near = page.evaluate(read, 0.88)
+    far = page.evaluate(read, 0.60)
+    check("the ground close by is textured, not a flat wash",
+          spread(near) > 6, f"variation {spread(near):.1f} of 255")
+    print(f"      variation across the ground: {spread(near):.1f} near, {spread(far):.1f} further off")
+
+    # walk a little and see whether the ground moved with us
+    before = page.evaluate(read, 0.88)
+    start = page.evaluate("() => window.__maze3d()")
+    page.evaluate("""async () => {
+      const press = (key, down) => window.dispatchEvent(
+        new KeyboardEvent(down ? 'keydown' : 'keyup', { key, code: key }));
+      press('ArrowUp', true);
+      await new Promise((r) => setTimeout(r, 260));
+      press('ArrowUp', false);
+      await new Promise((r) => setTimeout(r, 80));
+    }""")
+    after = page.evaluate(read, 0.88)
+    moved = page.evaluate("() => window.__maze3d()")
+    walked = ((moved["x"] - start["x"]) ** 2 + (moved["y"] - start["y"]) ** 2) ** 0.5
+    changed = sum(1 for a, b in zip(before, after) if abs(a - b) > 8) / len(before)
+    check("walking forward moves the ground under you",
+          walked > 0.05 and changed > 0.25,
+          f"walked {walked:.2f} and {changed * 100:.0f}% of the row changed")
+    print(f"      walked {walked:.2f} units, {changed * 100:.0f}% of the ground row changed")
+
+    # The grass is the only green thing in the view: the fence is brown and
+    # the sky is blue. So "green beats red low down, and does not up top" is
+    # enough to say the ground is on the ground and nowhere else.
+    low_r, low_g = channel(0.88, 0), channel(0.88, 1)
+    mid_r, mid_g = channel(0.5, 0), channel(0.5, 1)
+    check("what is underfoot is the grass", low_g > low_r + 8,
+          f"red {low_r:.0f}, green {low_g:.0f}")
+    check("and the fence above it is still fence, not grass over the top",
+          mid_r > mid_g, f"red {mid_r:.0f}, green {mid_g:.0f}")
+
     check("no page errors", not [e for e in errors if "ERR_" not in e], str(errors))
     browser.close()
 
