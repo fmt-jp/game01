@@ -9,7 +9,9 @@ its own directory and is self-contained.
 ## What is here
 
 Fifteen games, all on `main` and live. Service worker at `pocket-arcade-v17`;
-the whole site, every game included, works offline once visited.
+the whole site, every game included, works offline once visited. Ten of them
+were built in September 2026 and five since, at roughly one a week; `tests/`
+holds 29 checks over them, and a full run takes about twelve minutes.
 
 | Directory | Name | Kind | Worth knowing |
 |---|---|---|---|
@@ -81,6 +83,14 @@ Shared across every game, so the collection reads as one thing:
    - **bump `CACHE_NAME` in `sw.js`**.
 6. Push `main`.
 
+There are no pull requests here: a game is built on its branch, previewed,
+approved, and then merged locally with `--no-ff` and pushed. That leaves the
+branch behind on the remote, and nineteen of them have piled up. They are all
+contained in `main` and can go whenever; deleting a remote ref is refused from
+inside a session (the egress proxy answers 403), so it is done from a normal
+clone with
+`git push origin --delete $(git branch -r --merged main --format='%(refname:short)' | grep '^origin/claude/' | sed 's|^origin/||')`.
+
 **Bumping `CACHE_NAME` is not optional, for any change to any game.** The
 service worker serves the cached copy first, so a phone that has already
 installed the site will keep running the old code until the cache name changes.
@@ -120,6 +130,12 @@ drawn at load time (textures, scenery) must therefore use its own generator, not
 `run.sh` picks whichever interpreter has playwright installed; the system
 `python3` often does not, and a missing import otherwise looks like a broken
 check rather than a setup gap.
+
+**Run the suite on its own, and leave it alone while it runs.** Two things
+break a run that would otherwise pass: starting a second check beside it (they
+share port 8390, and the contention alone is enough to miss a frame budget or
+a scheduled note), and editing a file it has not reached yet. Both produce
+failures that do not reproduce, which cost more time than the run saved.
 
 ## Outstanding work
 
